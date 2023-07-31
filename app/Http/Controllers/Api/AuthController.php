@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Auth,Hash,Validator;
 use App\Models\User;
-
+ 
 class AuthController extends BaseController
 {
     public function __construct(){
