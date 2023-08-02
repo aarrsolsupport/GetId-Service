@@ -11,7 +11,7 @@ class PaymentMethodController extends BaseController
     public function __construct(){
 
     }
-
+    
     /*
      *** List Payment methods
     */

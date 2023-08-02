@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\API\BaseController as BaseController;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Auth,Hash,Validator;
+use Auth,Hash,Validator,DB;
 use App\Models\User;
  
 class AuthController extends BaseController
@@ -81,6 +81,16 @@ class AuthController extends BaseController
         }catch(CustomException $e) {
             return response()->json(['error' => 'UnAuthorised Access'], 401);
         }        
+    }
+
+    public function countryList(){
+        try{
+            $countries = DB::table('countries')->select('name','phone');
+            $countries = $countries->orderBy('phone','asc')->get();
+            return $this->sendResponse($countries, 'success');
+        }catch(Exception $e){
+            return $this->sendError('Validation Error.', 'Something went wrong.Please try again later.',401);  
+        }
     }
 
 }
