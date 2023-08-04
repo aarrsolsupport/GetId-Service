@@ -30,7 +30,7 @@ Route::prefix('bank')->group(function () {
     Route::post('/create', [BankController::class, 'create']);
     Route::post('/update', [BankController::class, 'update']);
     Route::delete('/delete/{id}', [BankController::class, 'delete']);
-    Route::get('/banks', [BankController::class, 'banks']);
+    Route::get('/get-bank-list', [BankController::class, 'banks']);
 });
 
 Route::prefix('payment-method')->group(function () {

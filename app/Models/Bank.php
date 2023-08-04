@@ -3,14 +3,18 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+//use Illuminate\Database\Eloquent\Model;
+use Jenssegers\Mongodb\Eloquent\Model;
 
 class Bank extends Model
 {
-    use HasFactory;
+    protected $connection   =   'mongodb';
+    protected $collection   =   'banks';
+
     protected $fillable = [
-        'name',
+        'bank_name',
         'country',
         'icon',
+        'created_at'
     ];
 }
