@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BankController;
 use App\Http\Controllers\Api\PaymentMethodController;
+use Illuminate\Support\Facades\Redis;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -18,13 +19,15 @@ use App\Http\Controllers\Api\PaymentMethodController;
 
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
-Route::get('countries', [AuthController::class, 'countryList']);
 
 Route::middleware('auth:api')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/profile', [AuthController::class, 'profile']);
 });
 
+Route::get('/test-redis', function () {
+    return Redis::get('key');
+});
 
 Route::prefix('bank')->group(function () {
     Route::post('/create', [BankController::class, 'create']);

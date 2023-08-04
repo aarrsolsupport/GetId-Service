@@ -83,14 +83,4 @@ class AuthController extends BaseController
         }        
     }
 
-    public function countryList(){
-        try{
-            $countries = DB::table('countries')->select('name','phone');
-            $countries = $countries->orderBy('phone','asc')->get();
-            return $this->sendResponse($countries, 'success');
-        }catch(Exception $e){
-            return $this->sendError('Validation Error.', 'Something went wrong.Please try again later.',401);  
-        }
-    }
-
 }

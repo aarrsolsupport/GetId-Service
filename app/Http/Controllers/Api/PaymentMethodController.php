@@ -4,7 +4,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\API\BaseController as BaseController;
 use Illuminate\Http\Request;
 use DB,Validator;
-use App\Models\Bank;
+use App\Models\PaymentMethod;
+use Illuminate\Validation\Rule;
 
 class PaymentMethodController extends BaseController
 {
@@ -17,13 +18,15 @@ class PaymentMethodController extends BaseController
     */
     public function paymentMethods(Request $request){
         try{
-            $methods = DB::table('payment_methods');
+            $methods = new PaymentMethod();
             if($request->search){
-                $methods = $methods->where('name','like',$request->search);
-                $methods = $methods->orWhere('country','like',$request->search);
+                $methods = $methods->where('name','like','%'.$request->search.'%');
             }
-            $orderBy = $request->orderBy?:'desc';
-            $methods = $methods->orderBy('id',$orderBy)->paginate(config('constants.pagination'));
+            $paginate = $request->paginate??config('constants.pagination');            
+            
+            $methods = $methods->whereIn('is_active',['1',1])
+                            ->orderBy('created_at','desc')
+                            ->paginate($paginate);
             return $this->sendResponse($methods, 'success');
         }catch(Exception $e){
             return $this->sendError('Validation Error.', 'Something went wrong.Please try again later.',401);  
@@ -37,30 +40,29 @@ class PaymentMethodController extends BaseController
         try{            
             $requestData = $request->all();
             $validator   = Validator::make($requestData,[
-                'name'      => 'required|max:128|min:2|unique:payment_methods',
-                'country'   => 'required|max:128|min:2',
-                'icon'      => 'required|mimes:jpeg,png,jpg,gif,svg|max:2048',
-                'is_wallet' => 'in:0,1'
+                'name'          => 'required|max:128|min:2|unique:payment_methods',
+                'country_id'    => 'required',
+                // 'icon'          => 'required|mimes:jpeg,png,jpg,gif,svg|max:2048',
             ],[
                 'name.required' => 'Payment method name is required.',
                 'name.unique'   => 'Payment method name already been taken.',
-                'icon.max'      => 'File should be less than 2MB.',
-                'icon.mimes'    => 'File format should be : jpeg, png, jpg, gif, svg',
-                'is_wallet.in'  => 'Wallet value invalid'
+                // 'icon.max'      => 'File should be less than 2MB.',
+                // 'icon.mimes'    => 'File format should be : jpeg, png, jpg, gif, svg',
             ]);
 
             if ($validator->fails()) {
                 return $this->sendError('Validation Error.', $validator->errors(),422);  
             }
+            // $file = $this->saveImageIntoS3Bucket($request->icon);
             $data = array(
-                'name' => $request->name,
-                'country'   => $request->country,
-                'icon'      => $request->icon,
-                'is_wallet' => $request->is_wallet,
-                // 'icon'       => $this->saveImageIntoS3Bucket($request->icon),
+                'name'          => $request->name,
+                'country_id'    => $request->country_id,
+                'icon'          => null,
+                'is_active'     => 1,
+                // 'icon'          => $file['filename']?$file['filename']:null,
             );
-            $res  = DB::table('payment_methods')->insert($data);
-            return $this->sendResponse([], 'Payment method inserted successfully.');
+            $res  = PaymentMethod::create($data);
+            return $this->sendResponse($res, 'Payment method inserted successfully.');
         }catch(Exception $e){
             return $this->sendError('Validation Error.', 'Something went wrong.Please try again later.',401);  
         }
@@ -73,16 +75,14 @@ class PaymentMethodController extends BaseController
         try{            
             $requestData = $request->all();
             $validator   = Validator::make($requestData,[
-                'name' => 'required|max:128|min:2|unique:payment_methods,name,'.$request->id,
-                'country'   => 'required|max:128|min:2',
-                'icon'      => 'mimes:jpeg,png,jpg,gif,svg|max:2048',
-                'is_wallet' => 'in:0,1'
+                'name'          => 'required|max:128|min:2|unique:payment_methods,name,'.$request->id,
+                'country_id'    => 'required|max:128|min:2',
+                // 'icon'       => 'mimes:jpeg,png,jpg,gif,svg|max:2048',
             ],[
                 'name.required' => 'Payment method name is required.',
                 'name.unique'   => 'Payment method name already been taken.',
-                'icon.max'      => 'File should be less than 2MB.',
-                'icon.mimes'    => 'File format should be : jpeg, png, jpg, gif, svg',
-                'is_wallet.in'  => 'Wallet value invalid'
+                // 'icon.max'      => 'File should be less than 2MB.',
+                // 'icon.mimes'    => 'File format should be : jpeg, png, jpg, gif, svg',
             ]);
 
             if ($validator->fails()) {
@@ -90,14 +90,13 @@ class PaymentMethodController extends BaseController
             }
             $data = array(
                 'name'      => $request->name,
-                'country'   => $request->country,
-                'is_wallet' => $request->is_wallet,
+                'country_id'   => $request->country_id,
             );
             if($request->icon){
                 $data['icon'] = $request->icon;
             }
-            $res  = DB::table('payment_methods')->where('id',$request->id)->update($data);
-            return $this->sendResponse([], 'Payment method updated successfully.');
+            $res  = PaymentMethod::where('_id',$request->id)->update($data);
+            return $this->sendResponse($res, 'Payment method updated successfully.');
         }catch(Exception $e){
             return $this->sendError('Validation Error.', 'Something went wrong.Please try again later.',401);  
         }
@@ -106,16 +105,18 @@ class PaymentMethodController extends BaseController
     /*
      ** Delete payment methods
     */
-    public function delete(Request $request){
+    public function delete($id){
         try{           
-            $res  = DB::table('payment_methods')->where('id',$request->id)->delete();
+            $res  = PaymentMethod::find($id);
             if($res){
+                $res->is_active = 0;
+                $res->save();
                 return $this->sendResponse([], 'Payment method deleted successfully.');
             }else{
                 return $this->sendError('Error.', 'Something went wrong.Please try again later.',401);  
             }
         }catch(Exception $e){
-            return $this->sendError('Validation Error.', 'Something went wrong.Please try again later.',401);  
+            return $this->sendError('Error.', 'Something went wrong.Please try again later.',401);  
         }
     }
 

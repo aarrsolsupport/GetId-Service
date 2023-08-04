@@ -4,7 +4,7 @@
 namespace App\Http\Controllers\API;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller as Controller;
-use Storage;
+use Illuminate\Support\Facades\Storage;
 
 
 class BaseController extends Controller
@@ -41,10 +41,15 @@ class BaseController extends Controller
     }
 
     public function saveImageIntoS3Bucket($file) {
-        $icon_name = time().".".$file->getClientOriginalExtension();
-        $is_provider_image_saved = Storage::disk('s3')->put('/exchange-icons/'.$icon_name, file_get_contents($file));
-        $file_full_path = Storage::disk('s3')->url('/exchange-icons/'.$icon_name);
-        return ['status'=> $is_provider_image_saved, 'file_path'=> $file_full_path];
+        $filenamewithExt    =   $file->getClientOriginalName();
+        $filename           =   pathinfo($filenamewithExt, PATHINFO_FILENAME);
+        $extension          =   strtolower($file->getClientOriginalExtension());
+        $filenameToStore    =   strtolower(str_replace(' ', '_', substr($filename, 0, 5))).'_'.time().rand(11111, 99999).'.'.$extension;
+        $is_image_saved     =   Storage::disk('s3')->put('/staging/payment-methods/'.$filenameToStore, file_get_contents($file));
+
+        $res['status'] = $is_image_saved;
+        $res['filename'] = $filenameToStore;
+        return $res;
     }
 
     public function deleteImageIntoS3Bucket($file_path) {

@@ -14,7 +14,6 @@ class BankController extends BaseController
 			$banks = DB::table('banks');
 			if($request->search){
 				$banks = $banks->where('name','like',$request->search);
-				$banks = $banks->orWhere('country','like',$request->search);
 			}
 			$orderBy = $request->orderBy?:'desc';
 			$banks = $banks->orderBy('id',$orderBy)->paginate(config('constants.pagination'));
