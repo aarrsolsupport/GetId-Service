@@ -31,6 +31,8 @@ Route::prefix('bank')->group(function () {
     Route::post('/update', [BankController::class, 'update']);
     Route::delete('/delete/{id}', [BankController::class, 'delete']);
     Route::get('/get-bank-list', [BankController::class, 'banks']);
+    Route::post('/update-bank-status', [BankController::class, 'updateBankStatus']);
+
 });
 
 Route::prefix('payment-method')->group(function () {

@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers\Api;
 use App\Http\Controllers\API\BaseController as BaseController;
-use App\Models\Bank;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
+use App\Models\Bank;
 use DB,Validator;
 use Exception;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+
+
 class BankController extends BaseController
 {
 
@@ -15,12 +18,12 @@ class BankController extends BaseController
             $pagination =   !empty($request->page_entries) ? $request->page_entries : 25 ;
 			$banks = new Bank();
             
-			// if($request->search){
-			// 	$banks = $banks->where('name','like',$request->search);
-			// 	//$banks = $banks->orWhere('country','like',$request->search);
-			// }
-			// $banks = $banks->orderBy('id','desc')->paginate($pagination);
-            $banks = DB::connection('mongodb')->collection('banks')->paginate($pagination);
+			if($request->search){
+				$banks = $banks->where('bank_name','like','%'.$request->search.'%')
+				                ->orWhere('country','like','%'.$request->search.'%');
+			}
+			$banks = $banks->orderBy('_id','desc')->paginate($pagination);
+            //dd($banks);
 			return $this->sendResponse($banks, 'success');
 		}catch(Exception $e){
 			return $this->sendError('Validation Error.', 'Something went wrong.Please try again later.',401);  
@@ -31,13 +34,13 @@ class BankController extends BaseController
         try{            
             $requestData = $request->all();
             if($request->hasFile('icon')) {
-                $iconName = $request->icon;
-                $filenamewithExt = $iconName->getClientOriginalName();
-                $filename = 	pathinfo($filenamewithExt, PATHINFO_FILENAME);
-                $extension = 	strtolower($iconName->getClientOriginalExtension());
+                $iconName           = $request->icon;
+                $filenamewithExt    = $iconName->getClientOriginalName();
+                $filename           = 	pathinfo($filenamewithExt, PATHINFO_FILENAME);
+                $extension          = 	strtolower($iconName->getClientOriginalExtension());
                 $filenameToStore 	= 	strtolower(str_replace(' ', '_', substr($filename, 0, 5))).'_'.time().rand(11111, 99999).'.'.$extension;
                 // $isIconSaved     =   Storage::disk('s3')->put(env('AWS_IMAGES_S3_ENV_URL').'bankIcon/'.$filenameToStore, file_get_contents($iconName));
-                $bankData['icon'] = $filenameToStore;
+                $bankData['icon']   = $filenameToStore;
                 
             }
             // return ($isIconSaved);
@@ -54,14 +57,17 @@ class BankController extends BaseController
             // if ($validator->fails()) {
             //     return $this->sendError('Validation Error.', $validator->errors(),422);  
             // }
-
+            // $rr = Str::slug($request->bank_name);
+            // dd($rr);
             $bankData = Bank::create([
-                'bank_name'            => $request->bank_name,
-                'country'          =>  $request->country,
-                'icon'           =>  $request->icon,
+                'bank_name' => $request->bank_name,
+                'country'   =>  $request->country,
+                'icon'      =>  $request->icon,
+                'is_active' => 1,
             ]);
-            return $this->sendResponse([], 'Bank registerd successfully.');
+            return $this->sendResponse($bankData, 'Bank registerd successfully.');
         }catch(Exception $e){
+            //dd($e);
             return $this->sendError('Validation Error.', 'Something went wrong.Please try again later.',401);  
         }
     }
@@ -85,6 +91,7 @@ class BankController extends BaseController
             $data = array(
             	'bank_name'	=> $request->bank_name,
             	'country'	=> $request->country,
+                'id'        => $request->id
             );
             if($request->icon){
             	$data['icon'] = $request->icon;
@@ -92,11 +99,11 @@ class BankController extends BaseController
             try{
                 $bank = Bank::find($request->id);
                 if($bank) {
-                    $bank->bank_name = $request->bank_name;
-                    $bank->country = $request->country;
+                    $bank->bank_name  = $request->bank_name;
+                    $bank->country    = $request->country;
                     $bank->save();
                 }
-                return $this->sendResponse([], 'Bank updated successfully.');
+                return $this->sendResponse($data, 'Bank updated successfully.');
             }
             catch(Exception $e){
                 return $this->sendError('Validation Error.', 'Data not found',404);  
@@ -110,14 +117,35 @@ class BankController extends BaseController
         try{         
             $bank = Bank::find($id);
             if($bank){
-                //$bank->delete();
-                return $this->sendResponse([], 'Bank deleted successfully.');
+                $bank->is_active  = 0;
+                $bank->save();
+                return $this->sendResponse($id, 'Bank deleted successfully.');
             }
             else{
             	return $this->sendError('Error.', 'Something went wrong.Please try again later.',401);  
 			}
         }catch(Exception $e){
             return $this->sendError('Validation Error.', 'Something went wrong.Please try again later.',401);  
+        }
+    }
+
+    public function updateBankStatus(Request $request)
+    {
+        try {
+            $requestData = $request->all();
+            $id = $requestData['id'];
+            $bank = Bank::find($id);
+            if($bank) {
+                $bank->is_active = $bank->is_active == 0 ? 1 : 0;
+                $bank->save();
+                $data['id'] = $id;
+                $data['is_active'] = $bank->is_active;
+                return $this->sendResponse($data, 'Bank status updated successfully.');
+            } else {
+                return $this->sendError('Error.', 'Something went wrong.Please try again later.',401);
+            }
+        } catch (Exception $e) {
+            return $this->sendError('Validation Error.', 'Something went wrong.Please try again later.',401);
         }
     }
 }
