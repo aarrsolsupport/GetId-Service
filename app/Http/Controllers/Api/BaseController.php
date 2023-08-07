@@ -40,13 +40,13 @@ class BaseController extends Controller
         return response()->json($response, $code);
     }
 
-    public function saveImageIntoS3Bucket($file) {
+    public function saveImageIntoS3Bucket($file,$endPath='') {
         $filenamewithExt    =   $file->getClientOriginalName();
         $filename           =   pathinfo($filenamewithExt, PATHINFO_FILENAME);
         $extension          =   strtolower($file->getClientOriginalExtension());
         $filenameToStore    =   strtolower(str_replace(' ', '_', substr($filename, 0, 5))).'_'.time().rand(11111, 99999).'.'.$extension;
-        $is_image_saved     =   Storage::disk('s3')->put('/staging/payment-methods/'.$filenameToStore, file_get_contents($file));
-
+        $is_image_saved     =   Storage::disk('s3')->put('/staging/'.$endPath.'/'.$filenameToStore, file_get_contents($file));
+        
         $res['status'] = $is_image_saved;
         $res['filename'] = $filenameToStore;
         return $res;

@@ -40,26 +40,21 @@ class PaymentMethodController extends BaseController
         try{            
             $requestData = $request->all();
             $validator   = Validator::make($requestData,[
-                'name'          => 'required|max:128|min:2|unique:payment_methods',
-                'country_id'    => 'required',
-                // 'icon'          => 'required|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'name'          => 'required|max:128|min:2',
+                'icon'          => 'required',
             ],[
                 'name.required' => 'Payment method name is required.',
                 'name.unique'   => 'Payment method name already been taken.',
-                // 'icon.max'      => 'File should be less than 2MB.',
-                // 'icon.mimes'    => 'File format should be : jpeg, png, jpg, gif, svg',
             ]);
 
             if ($validator->fails()) {
-                return $this->sendError('Validation Error.', $validator->errors(),422);  
+                return $this->sendError('Validation Error.', $validator->errors()->first(),422);  
             }
-            // $file = $this->saveImageIntoS3Bucket($request->icon);
+            // $file = $this->saveImageIntoS3Bucket($request->icon,'payment-method');
             $data = array(
                 'name'          => $request->name,
-                'country_id'    => $request->country_id,
-                'icon'          => null,
+                'icon'          => $request->icon,
                 'is_active'     => 1,
-                // 'icon'          => $file['filename']?$file['filename']:null,
             );
             $res  = PaymentMethod::create($data);
             return $this->sendResponse($res, 'Payment method inserted successfully.');
@@ -75,28 +70,23 @@ class PaymentMethodController extends BaseController
         try{            
             $requestData = $request->all();
             $validator   = Validator::make($requestData,[
-                'name'          => 'required|max:128|min:2|unique:payment_methods,name,'.$request->id,
-                'country_id'    => 'required|max:128|min:2',
-                // 'icon'       => 'mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'name'       => 'required|max:128|min:2',
+                'icon'       => 'nullable',
             ],[
                 'name.required' => 'Payment method name is required.',
                 'name.unique'   => 'Payment method name already been taken.',
-                // 'icon.max'      => 'File should be less than 2MB.',
-                // 'icon.mimes'    => 'File format should be : jpeg, png, jpg, gif, svg',
             ]);
 
             if ($validator->fails()) {
-                return $this->sendError('Validation Error.', $validator->errors(),422);  
+                return $this->sendError('Validation Error.', $validator->errors()->first(),422);  
             }
-            $data = array(
-                'name'      => $request->name,
-                'country_id'   => $request->country_id,
-            );
+            $data['name'] = $request->name;
             if($request->icon){
                 $data['icon'] = $request->icon;
             }
             $res  = PaymentMethod::where('_id',$request->id)->update($data);
-            return $this->sendResponse($res, 'Payment method updated successfully.');
+            $img_url = env('AWS_IMAGE_URL').'payment-method/'.$data['icon'];
+            return $this->sendResponse(['icon'=>$img_url], 'Payment method updated successfully.');
         }catch(Exception $e){
             return $this->sendError('Validation Error.', 'Something went wrong.Please try again later.',401);  
         }

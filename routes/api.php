@@ -5,6 +5,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BankController;
 use App\Http\Controllers\Api\PaymentMethodController;
+use App\Http\Controllers\Api\Admin\PosterController;
+use App\Http\Controllers\Api\Admin\SocialMediaController;
 use Illuminate\Support\Facades\Redis;
 /*
 |--------------------------------------------------------------------------
@@ -19,14 +21,11 @@ use Illuminate\Support\Facades\Redis;
 
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
+Route::post('social-media', [AuthController::class, 'socialMedia']);
 
 Route::middleware('auth:api')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/profile', [AuthController::class, 'profile']);
-});
-
-Route::get('/test-redis', function () {
-    return Redis::get('key');
 });
 
 Route::prefix('bank')->group(function () {
@@ -41,4 +40,17 @@ Route::prefix('payment-method')->group(function () {
     Route::post('/update', [PaymentMethodController::class, 'update']);
     Route::delete('/delete/{id}', [PaymentMethodController::class, 'delete']);
     Route::get('/list', [PaymentMethodController::class, 'paymentMethods']);        
+});
+
+Route::prefix('admin')->group(function () {
+    Route::prefix('poster')->group(function () {
+        Route::post('/create', [PosterController::class, 'create']);
+        Route::post('/update', [PosterController::class, 'update']);
+        Route::delete('/delete/{id}', [PosterController::class, 'delete']);
+        Route::get('/list', [PosterController::class, 'list']);        
+    }); 
+    Route::prefix('social-media')->group(function () {
+        Route::post('/create', [SocialMediaController::class, 'socialMedia']);        
+        Route::get('/list', [SocialMediaController::class, 'socialMediaList']);    
+    });   
 });
