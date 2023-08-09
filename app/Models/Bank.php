@@ -17,6 +17,7 @@ class Bank extends Model
         'country',
         'icon',
         'slug',
+        'labels',
         'created_at',
         'is_active'
     ];
@@ -36,6 +37,15 @@ class Bank extends Model
 
             $model->slug = $slug;
         });
+    }
+
+    public function getIconAttribute($value){
+        if($value){
+            $prefix = 'https://victorybucket-new.s3.ap-south-1.amazonaws.com/staging/bank/';
+            return $prefix.''.$value;
+        }else{
+            return public_path('images/no_image.png');
+        }
     }
 
 

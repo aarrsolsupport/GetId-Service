@@ -23,7 +23,9 @@ class BankController extends BaseController
 				                ->orWhere('country','like','%'.$request->search.'%');
 			}
 			$banks = $banks->orderBy('_id','desc')->paginate($pagination);
-            //dd($banks);
+            foreach($banks as $bankData) {
+                $bankData->labels = unserialize($bankData['labels']);
+            }
 			return $this->sendResponse($banks, 'success');
 		}catch(Exception $e){
 			return $this->sendError('Validation Error.', 'Something went wrong.Please try again later.',401);  
@@ -32,42 +34,33 @@ class BankController extends BaseController
 
 	public function create(Request $request){
         try{            
-            $requestData = $request->all();
             if($request->hasFile('icon')) {
                 $iconName           = $request->icon;
                 $filenamewithExt    = $iconName->getClientOriginalName();
                 $filename           = 	pathinfo($filenamewithExt, PATHINFO_FILENAME);
                 $extension          = 	strtolower($iconName->getClientOriginalExtension());
                 $filenameToStore 	= 	strtolower(str_replace(' ', '_', substr($filename, 0, 5))).'_'.time().rand(11111, 99999).'.'.$extension;
-                // $isIconSaved     =   Storage::disk('s3')->put(env('AWS_IMAGES_S3_ENV_URL').'bankIcon/'.$filenameToStore, file_get_contents($iconName));
                 $bankData['icon']   = $filenameToStore;
                 
             }
-            // return ($isIconSaved);
-            // $validator   = Validator::make($requestData,[
-            //     'bank_name' => 'required|max:128|min:2|unique:banks',
-            //     //'country'   => 'required|max:128|min:2',
-            //     'country'   => 'required|max:128',
-            //     'icon'      => 'required|mimes:jpeg,png,jpg,gif,svg|max:2048'
-            // ],[
-            // 	'icon.max' => 'File should be less than 2MB.',
-            // 	'icon.mimes' => 'File format should be : jpeg, png, jpg, gif, svg',
-            // ]);
+            $validator   = Validator::make($request->all(),[
+                'bank_name' => 'required|max:128|min:2',
+                'country'   => 'required|max:128',
+                'icon'      => 'required'
+            ]);
 
-            // if ($validator->fails()) {
-            //     return $this->sendError('Validation Error.', $validator->errors(),422);  
-            // }
-            // $rr = Str::slug($request->bank_name);
-            // dd($rr);
+            if ($validator->fails()) {
+                return $this->sendError('Validation Errorr.', $validator->errors()->first(),422);  
+            }
             $bankData = Bank::create([
                 'bank_name' => $request->bank_name,
                 'country'   =>  $request->country,
                 'icon'      =>  $request->icon,
                 'is_active' => 1,
+                'labels' => serialize(json_decode($request->lables))
             ]);
             return $this->sendResponse($bankData, 'Bank registerd successfully.');
         }catch(Exception $e){
-            //dd($e);
             return $this->sendError('Validation Error.', 'Something went wrong.Please try again later.',401);  
         }
     }
@@ -75,23 +68,21 @@ class BankController extends BaseController
     public function update(Request $request){
         try{            
             $requestData = $request->all();
-            // $validator   = Validator::make($requestData,[
-            //     'bank_name' => 'required|max:128|min:2|unique:banks,bank_name,'.$request->id,
-            //     'country'   => 'required|max:128|min:2',
-            //     'icon'      => 'mimes:jpeg,png,jpg,gif,svg|max:2048'
-            // ],[
-            // 	'icon.max' => 'File should be less than 2MB.',
-            // 	'icon.mimes' => 'File format should be : jpeg, png, jpg, gif, svg',
-            // ]);
+            $validator   = Validator::make($requestData,[
+                'bank_name' => 'required|max:128|min:2',
+                'country'   => 'required|max:128|min:2',
+                'icon'      => 'nullable'
+            ]);
 
-            // if ($validator->fails()) {
-            //     return $this->sendError('Validation Error.', $validator->errors(),422);  
-            // }
+            if ($validator->fails()) {
+                return $this->sendError('Validation Error.', $validator->errors()->first(),422);  
+            }
 
             $data = array(
             	'bank_name'	=> $request->bank_name,
             	'country'	=> $request->country,
-                'id'        => $request->id
+                'id'        => $request->id,
+                'labels' => serialize(json_decode($request->lables))
             );
             if($request->icon){
             	$data['icon'] = $request->icon;
@@ -101,7 +92,11 @@ class BankController extends BaseController
                 if($bank) {
                     $bank->bank_name  = $request->bank_name;
                     $bank->country    = $request->country;
+                    $bank->labels     = serialize(json_decode($request->lables));
                     $bank->save();
+                }
+                if($request->icon){
+                    $data['icon'] = 'https://victorybucket-new.s3.ap-south-1.amazonaws.com/staging/bank/'.$request->icon;
                 }
                 return $this->sendResponse($data, 'Bank updated successfully.');
             }
@@ -147,5 +142,49 @@ class BankController extends BaseController
         } catch (Exception $e) {
             return $this->sendError('Validation Error.', 'Something went wrong.Please try again later.',401);
         }
+    }
+
+    public function search(Request $request)
+    {
+        //dd($request->all());
+        $banks = new Bank();
+        $pattern = $request->lablels.'.*'; // "icici.*"
+        // if($request->lablels){
+        //     //SELECT * FROM table_name WHERE some_field REGEXP '.*"item_key";s:[0-9]+:"item_value".*'
+
+        //     $banks = $banks->where('labels','REGXP',$pattern);
+        // }
+        // $banks = $banks->orderBy('_id','desc')->get();
+
+        //$documents = DB::connection('mongodb')->collection('banks')->get(['labels']);
+
+        $searchValue = 'icici';
+        
+       
+
+        $results = DB::connection('mongodb')->collection('banks')
+            ->raw(function ($collection) use ($searchValue) {
+                return $collection->aggregate([
+                    [
+                        '$match' => [
+                            'labels' => $searchValue,
+                        ],
+                    ],
+                ]);
+            });
+
+            $serializedField = [];
+            foreach ($results as $result) {
+                // Access the serializedField and other fields
+                $serializedField = $result->labels;
+                // Process other fields as needed
+            }
+        dd($serializedField);
+    }
+
+    public function deleteAll()
+    {
+        Bank::truncate(); // Deletes all records from the collection
+        return $this->sendResponse([], 'All records deleted successfully.');
     }
 }
