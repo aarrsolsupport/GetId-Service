@@ -9,9 +9,6 @@ use App\Models\Admin\Poster;
 
 class PosterController extends BaseController
 {
-    public function __construct(){
-
-    }
     
     /*
      *** List Payment methods
@@ -38,8 +35,17 @@ class PosterController extends BaseController
         try{            
             $requestData = $request->all();
             $validator   = Validator::make($requestData,[
-                'type'     => 'required',
-                'image'    => 'required',
+                'type' => [
+                    'required',
+                    function ($attribute, $value, $fail) {
+                        $existingPoster = Poster::where('type', $value)->first();
+
+                        if ($existingPoster) {
+                            $fail('The '.$attribute.' has already been taken.');
+                        }
+                    },
+                ],
+                'image' => 'required',
             ]);
 
             if ($validator->fails()) {
@@ -65,8 +71,17 @@ class PosterController extends BaseController
         try{            
             $requestData = $request->all();
             $validator   = Validator::make($requestData,[
-                'type'     => 'required',
-                'image'    => 'nullable',
+                'type' => [
+                    'required',
+                    function ($attribute, $value, $fail)  use($request){
+                        $existingPoster = Poster::where('type', $value)->whereNotIn('_id',[$request->id])->first();
+
+                        if ($existingPoster) {
+                            $fail('The '.$attribute.' has already been taken.');
+                        }
+                    },
+                ],
+                'image' => 'nullable',
             ]);
 
             if ($validator->fails()) {

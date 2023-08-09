@@ -40,11 +40,17 @@ class PaymentMethodController extends BaseController
         try{            
             $requestData = $request->all();
             $validator   = Validator::make($requestData,[
-                'name'          => 'required|max:128|min:2',
-                'icon'          => 'required',
-            ],[
-                'name.required' => 'Payment method name is required.',
-                'name.unique'   => 'Payment method name already been taken.',
+                'name' => [
+                    'required','max:128','min:2',
+                    function ($attribute, $value, $fail) {
+                        $existingMethod = PaymentMethod::where('name', $value)->first();
+
+                        if ($existingMethod) {
+                            $fail('The '.$attribute.' has already been taken.');
+                        }
+                    },
+                ],
+                'icon' => 'required',
             ]);
 
             if ($validator->fails()) {
@@ -70,11 +76,17 @@ class PaymentMethodController extends BaseController
         try{            
             $requestData = $request->all();
             $validator   = Validator::make($requestData,[
-                'name'       => 'required|max:128|min:2',
-                'icon'       => 'nullable',
-            ],[
-                'name.required' => 'Payment method name is required.',
-                'name.unique'   => 'Payment method name already been taken.',
+                'name' => [
+                    'required','max:128','min:2',
+                    function ($attribute, $value, $fail) use($request) {
+                        $existingMethod = PaymentMethod::where('name', $value)->whereNotIn('_id',[$request->id])->first();
+
+                        if ($existingMethod) {
+                            $fail('The '.$attribute.' has already been taken.');
+                        }
+                    },
+                ],
+                'icon' => 'nullable',
             ]);
 
             if ($validator->fails()) {
@@ -85,8 +97,11 @@ class PaymentMethodController extends BaseController
                 $data['icon'] = $request->icon;
             }
             $res  = PaymentMethod::where('_id',$request->id)->update($data);
-            $img_url = env('AWS_IMAGE_URL').'payment-method/'.$data['icon'];
-            return $this->sendResponse(['icon'=>$img_url], 'Payment method updated successfully.');
+            $response = [];
+            if($request->icon){
+                $response['icon'] = env('AWS_IMAGE_URL').'payment-method/'.$data['icon'];
+            }
+            return $this->sendResponse($response, 'Payment method updated successfully.');
         }catch(Exception $e){
             return $this->sendError('Validation Error.', 'Something went wrong.Please try again later.',401);  
         }

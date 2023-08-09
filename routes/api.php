@@ -7,7 +7,7 @@ use App\Http\Controllers\Api\BankController;
 use App\Http\Controllers\Api\PaymentMethodController;
 use App\Http\Controllers\Api\Admin\PosterController;
 use App\Http\Controllers\Api\Admin\SocialMediaController;
-use Illuminate\Support\Facades\Redis;
+use App\Http\Controllers\Api\Admin\WalletLimitController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -52,5 +52,9 @@ Route::prefix('admin')->group(function () {
     Route::prefix('social-media')->group(function () {
         Route::post('/create', [SocialMediaController::class, 'socialMedia']);        
         Route::get('/list', [SocialMediaController::class, 'socialMediaList']);    
+    }); 
+    Route::prefix('wallet-limit')->group(function () {
+        Route::post('/create', [WalletLimitController::class, 'create']);        
+        Route::get('/list', [WalletLimitController::class, 'getWalletLimitData']);    
     });   
 });
