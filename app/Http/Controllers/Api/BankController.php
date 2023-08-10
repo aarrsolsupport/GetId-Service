@@ -59,6 +59,7 @@ class BankController extends BaseController
                 'is_active' => 1,
                 'labels' => serialize(json_decode($request->lables))
             ]);
+            $bankData->labels = $request->lables;
             return $this->sendResponse($bankData, 'Bank registerd successfully.');
         }catch(Exception $e){
             return $this->sendError('Validation Error.', 'Something went wrong.Please try again later.',401);  
@@ -92,6 +93,7 @@ class BankController extends BaseController
                 if($bank) {
                     $bank->bank_name  = $request->bank_name;
                     $bank->country    = $request->country;
+                    $bank->icon       = $request->icon;
                     $bank->labels     = serialize(json_decode($request->lables));
                     $bank->save();
                 }
