@@ -8,11 +8,19 @@ use App\Models\Bank;
 use DB,Validator;
 use Exception;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 
 class BankController extends BaseController
 {
-
+	
+	/**
+	 * Method bank list
+	 * created by: aakash gupta
+	 * @param Request $request [explicite description]
+	 *
+	 * @return void
+	*/
 	public function banks(Request $request){
 		try{
             $pagination =   !empty($request->page_entries) ? $request->page_entries : 25 ;
@@ -31,7 +39,14 @@ class BankController extends BaseController
 			return $this->sendError('Validation Error.', 'Something went wrong.Please try again later.',401);  
 		}
 	}
-
+	
+	/**
+	 * Method add bank
+	 * created by: aakash gupta
+	 * @param Request $request [explicite description]
+	 *
+	 * @return void
+	 */
 	public function create(Request $request){
         try{            
             if($request->hasFile('icon')) {
@@ -44,7 +59,16 @@ class BankController extends BaseController
                 
             }
             $validator   = Validator::make($request->all(),[
-                'bank_name' => 'required|max:128|min:2',
+                'bank_name' => [
+                    'required','max:128','min:2',
+                    function ($attribute,$value,$fail) use($request) {
+                        $existingBank = Bank::where($attribute,$value)->where('country',$request->country)->first();
+                        if($existingBank) {
+                            $fail('Bank name should be unique with country:'.$request->country.'.');      
+                        }
+                    },
+                ],
+                    
                 'country'   => 'required|max:128',
                 'icon'      => 'required'
             ]);
@@ -62,15 +86,30 @@ class BankController extends BaseController
             $bankData->labels = $request->lables;
             return $this->sendResponse($bankData, 'Bank registerd successfully.');
         }catch(Exception $e){
-            return $this->sendError('Validation Error.', 'Something went wrong.Please try again later.',401);  
+            return $this->sendError('Validation Error.', 'something went wrong,please try again later',401);  
         }
     }
-
+    
+    /**
+     * Method bank update
+     * created by: aakash gupta
+     * @param Request $request [explicite description]
+     *
+     * @return void
+     */
     public function update(Request $request){
         try{            
             $requestData = $request->all();
             $validator   = Validator::make($requestData,[
-                'bank_name' => 'required|max:128|min:2',
+                'bank_name' => [
+                    'required','max:128','min:2',
+                    function ($attribute,$value,$fail) use($request) {
+                        $existingBank = Bank::where($attribute,$value)->where('country',$request->country)->where('_id','<>',$request->id)->first();
+                        if($existingBank) {
+                            $fail('Bank name should be unique with country:'.$request->country.'.');      
+                        }
+                    },
+                ],
                 'country'   => 'required|max:128|min:2',
                 'icon'      => 'nullable'
             ]);
@@ -109,7 +148,14 @@ class BankController extends BaseController
             return $this->sendError('Validation Error.', 'Something went wrong.Please try again later.',401);  
         }
     }    
-
+    
+    /**
+     * Method bank delete
+     * created by: aakash gupta
+     * @param $id $id [explicite description]
+     *
+     * @return void
+     */
     public function delete($id){
         try{         
             $bank = Bank::find($id);
@@ -125,7 +171,14 @@ class BankController extends BaseController
             return $this->sendError('Validation Error.', 'Something went wrong.Please try again later.',401);  
         }
     }
-
+    
+    /**
+     * Method update bank status
+     * created by: aakash gupta
+     * @param Request $request [explicite description]
+     *
+     * @return void
+     */
     public function updateBankStatus(Request $request)
     {
         try {
@@ -145,10 +198,16 @@ class BankController extends BaseController
             return $this->sendError('Validation Error.', 'Something went wrong.Please try again later.',401);
         }
     }
-
+    
+    /**
+     * Method search for lables in banks table
+     * created by: aakash gupta
+     * @param Request $request [explicite description]
+     *
+     * @return void
+     */
     public function search(Request $request)
     {
-        //dd($request->all());
         $banks = new Bank();
         $pattern = $request->lablels.'.*'; // "icici.*"
         // if($request->lablels){
@@ -161,9 +220,6 @@ class BankController extends BaseController
         //$documents = DB::connection('mongodb')->collection('banks')->get(['labels']);
 
         $searchValue = 'icici';
-        
-       
-
         $results = DB::connection('mongodb')->collection('banks')
             ->raw(function ($collection) use ($searchValue) {
                 return $collection->aggregate([
@@ -183,7 +239,12 @@ class BankController extends BaseController
             }
         dd($serializedField);
     }
-
+    
+    /**
+     * Method truncate banks table
+     * created by: aakash gupta
+     * @return void
+     */
     public function deleteAll()
     {
         Bank::truncate(); // Deletes all records from the collection
