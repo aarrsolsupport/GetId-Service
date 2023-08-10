@@ -16,11 +16,12 @@ class PosterController extends BaseController
     public function list(Request $request){
         try{
             $methods = new Poster();
-            if($request->search){
-                $methods = $methods->where('type','like','%'.$request->search.'%');
+            if($request->search && $request->search!='all'){
+                $methods = $methods->where('type',$request->search);
             }
             $paginate = $request->paginate??config('constants.pagination');
-            $methods = $methods->orderBy('created_at','desc')
+            $methods = $methods->whereIn('is_active',[1,"1"])
+                            ->orderBy('created_at','desc')
                             ->paginate($paginate);
             return $this->sendResponse($methods, 'success');
         }catch(Exception $e){
@@ -36,7 +37,7 @@ class PosterController extends BaseController
             $requestData = $request->all();
             $validator   = Validator::make($requestData,[
                 'type' => [
-                    'required',
+                    'required','numeric','between:1,11',
                     function ($attribute, $value, $fail) {
                         $existingPoster = Poster::where('type', $value)->first();
 
@@ -46,17 +47,22 @@ class PosterController extends BaseController
                     },
                 ],
                 'image' => 'required',
+            ],[
+                'type.between'  => 'Invalid Type value.',
             ]);
 
             if ($validator->fails()) {
-                return $this->sendError('Validation Error.', $validator->errors(),422);  
+                return $this->sendError('Validation Error.', $validator->errors()->first(),422);  
             }
-            $file = $this->saveImageIntoS3Bucket($request->image,'posters');
             $data = array(
                 'type'          => $request->type,
                 'is_active'     => 1,
-                'image'          => $file['filename']?$file['filename']:null,
+                'image'         => $request->image,
             );
+            // if($request->image){
+            //     $file = $this->saveImageIntoS3Bucket($request->image,'posters');
+            //     $data['image'] = $file['filename']
+            // }
             $res  = Poster::create($data);
             return $this->sendResponse($res, 'Poster inserted successfully.');
         }catch(Exception $e){

@@ -11,10 +11,10 @@ class SocialMedia extends Model
     protected $connection   =   'mongodb';
     protected $collection   =   'social_medias';
     protected $fillable = [
-        'contact_no1',
-        'contact_no2',
-        'whatsapp1',
-        'whatsapp2',
+        'support_no1',
+        'support_no2',
+        'whatsapp_no1',
+        'whatsapp_no2',
         'email',
         'telegram_link',
         'instagram_link',
