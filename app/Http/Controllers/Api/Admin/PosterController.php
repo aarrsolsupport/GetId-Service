@@ -1,30 +1,26 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\Api\Admin;
 use App\Http\Controllers\API\BaseController as BaseController;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use DB,Validator;
-use App\Models\PaymentMethod;
-use Illuminate\Validation\Rule;
+use App\Models\Admin\Poster;
 
-class PaymentMethodController extends BaseController
+class PosterController extends BaseController
 {
-    public function __construct(){
-
-    }
     
     /*
      *** List Payment methods
     */
-    public function paymentMethods(Request $request){
+    public function list(Request $request){
         try{
-            $methods = new PaymentMethod();
-            if($request->search){
-                $methods = $methods->where('name','like','%'.$request->search.'%');
+            $methods = new Poster();
+            if($request->search && $request->search!='all'){
+                $methods = $methods->where('type',$request->search);
             }
-            $paginate = $request->paginate??config('constants.pagination');            
-            
-            $methods = $methods->whereIn('is_active',['1',1])
+            $paginate = $request->paginate??config('constants.pagination');
+            $methods = $methods->whereIn('is_active',[1,"1"])
                             ->orderBy('created_at','desc')
                             ->paginate($paginate);
             return $this->sendResponse($methods, 'success');
@@ -40,30 +36,35 @@ class PaymentMethodController extends BaseController
         try{            
             $requestData = $request->all();
             $validator   = Validator::make($requestData,[
-                'name' => [
-                    'required','max:128','min:2',
+                'type' => [
+                    'required','numeric','between:1,11',
                     function ($attribute, $value, $fail) {
-                        $existingMethod = PaymentMethod::where('name', $value)->first();
+                        $existingPoster = Poster::where('type', $value)->first();
 
-                        if ($existingMethod) {
+                        if ($existingPoster) {
                             $fail('The '.$attribute.' has already been taken.');
                         }
                     },
                 ],
-                'icon' => 'required',
+                'image' => 'required',
+            ],[
+                'type.between'  => 'Invalid Type value.',
             ]);
 
             if ($validator->fails()) {
                 return $this->sendError('Validation Error.', $validator->errors()->first(),422);  
             }
-            // $file = $this->saveImageIntoS3Bucket($request->icon,'payment-method');
             $data = array(
-                'name'          => $request->name,
-                'icon'          => $request->icon,
+                'type'          => $request->type,
                 'is_active'     => 1,
+                'image'         => $request->image,
             );
-            $res  = PaymentMethod::create($data);
-            return $this->sendResponse($res, 'Payment method inserted successfully.');
+            // if($request->image){
+            //     $file = $this->saveImageIntoS3Bucket($request->image,'posters');
+            //     $data['image'] = $file['filename']
+            // }
+            $res  = Poster::create($data);
+            return $this->sendResponse($res, 'Poster inserted successfully.');
         }catch(Exception $e){
             return $this->sendError('Validation Error.', 'Something went wrong.Please try again later.',401);  
         }
@@ -76,32 +77,35 @@ class PaymentMethodController extends BaseController
         try{            
             $requestData = $request->all();
             $validator   = Validator::make($requestData,[
-                'name' => [
-                    'required','max:128','min:2',
-                    function ($attribute, $value, $fail) use($request) {
-                        $existingMethod = PaymentMethod::where('name', $value)->whereNotIn('_id',[$request->id])->first();
+                'type' => [
+                    'required',
+                    function ($attribute, $value, $fail)  use($request){
+                        $existingPoster = Poster::where('type', $value)->whereNotIn('_id',[$request->id])->first();
 
-                        if ($existingMethod) {
+                        if ($existingPoster) {
                             $fail('The '.$attribute.' has already been taken.');
                         }
                     },
                 ],
-                'icon' => 'nullable',
+                'image' => 'nullable',
             ]);
 
             if ($validator->fails()) {
-                return $this->sendError('Validation Error.', $validator->errors()->first(),422);  
+                return $this->sendError('Validation Error.', $validator->errors(),422);  
             }
-            $data['name'] = $request->name;
-            if($request->icon){
-                $data['icon'] = $request->icon;
+            $data = array(
+                'type'      => $request->type,
+            );
+            if($request->image){
+                $file = $this->saveImageIntoS3Bucket($request->image,'posters');
+                $data['icon'] = $file['filename'];
             }
-            $res  = PaymentMethod::where('_id',$request->id)->update($data);
-            $response = [];
-            if($request->icon){
-                $response['icon'] = env('AWS_IMAGE_URL').'payment-method/'.$data['icon'];
+            $res  = Poster::where('_id',$request->id)->update($data);
+            if($res){
+                return $this->sendResponse($res, 'Poster updated successfully.');
+            }else{
+                return $this->sendError('Error.', 'Something went wrong.Please try again later.',401);  
             }
-            return $this->sendResponse($response, 'Payment method updated successfully.');
         }catch(Exception $e){
             return $this->sendError('Validation Error.', 'Something went wrong.Please try again later.',401);  
         }
@@ -112,11 +116,9 @@ class PaymentMethodController extends BaseController
     */
     public function delete($id){
         try{           
-            $res  = PaymentMethod::find($id);
+            $res  = Poster::where('_id',$id)->update(['is_active'=>0]);
             if($res){
-                $res->is_active = 0;
-                $res->save();
-                return $this->sendResponse([], 'Payment method deleted successfully.');
+                return $this->sendResponse([], 'Poster deleted successfully.');
             }else{
                 return $this->sendError('Error.', 'Something went wrong.Please try again later.',401);  
             }
@@ -124,5 +126,4 @@ class PaymentMethodController extends BaseController
             return $this->sendError('Error.', 'Something went wrong.Please try again later.',401);  
         }
     }
-
 }
