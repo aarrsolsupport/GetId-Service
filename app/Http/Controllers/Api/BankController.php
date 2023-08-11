@@ -64,7 +64,7 @@ class BankController extends BaseController
                     function ($attribute,$value,$fail) use($request) {
                         $existingBank = Bank::where($attribute,$value)->where('country',$request->country)->first();
                         if($existingBank) {
-                            $fail('Bank name should be unique with country:'.$request->country.'.');      
+                            $fail('Bank name should be unique with country: '.$request->country.'.');      
                         }
                     },
                 ],
@@ -106,7 +106,7 @@ class BankController extends BaseController
                     function ($attribute,$value,$fail) use($request) {
                         $existingBank = Bank::where($attribute,$value)->where('country',$request->country)->where('_id','<>',$request->id)->first();
                         if($existingBank) {
-                            $fail('Bank name should be unique with country:'.$request->country.'.');      
+                            $fail('Bank name should be unique with country: '.$request->country.'.');      
                         }
                     },
                 ],
@@ -250,4 +250,5 @@ class BankController extends BaseController
         Bank::truncate(); // Deletes all records from the collection
         return $this->sendResponse([], 'All records deleted successfully.');
     }
+    
 }
