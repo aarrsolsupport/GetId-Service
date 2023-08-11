@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\PaymentMethodController;
 use App\Http\Controllers\Api\Admin\PosterController;
 use App\Http\Controllers\Api\Admin\SocialMediaController;
 use App\Http\Controllers\Api\Admin\WalletLimitController;
+use App\Http\Controllers\Api\Admin\CheaterUserController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -56,5 +57,11 @@ Route::prefix('admin')->group(function () {
     Route::prefix('wallet-limit')->group(function () {
         Route::post('/create', [WalletLimitController::class, 'create']);        
         Route::get('/list', [WalletLimitController::class, 'getWalletLimitData']);    
+    }); 
+
+    Route::prefix('cheater-user')->group(function () {
+        Route::get('/list', [CheaterUserController::class, 'list']);    
+        Route::post('/create', [CheaterUserController::class, 'create']);        
+        Route::delete('/delete/{id}', [CheaterUserController::class, 'delete']);
     });   
 });
