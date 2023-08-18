@@ -28,6 +28,8 @@ class UserNumberController extends BaseController
             $userIds = [];
             $userNumber = new UserNumber();
             $type = $request->date_type;
+            $from = Carbon::create($request->from_date);
+            $to = Carbon::create($request->to_date);
             
             if($type != '' && in_array($type,[1,2,3,4])){
                 if($type==1){
@@ -36,16 +38,20 @@ class UserNumberController extends BaseController
                 }else{
                     $arr = array(2=>1,3=>7,4=>30);
                     $d = $arr[$type];
-                    $startDate = Carbon::now()->subDay($d);
-                    $userNumber = $userNumber->where('created_at', '>=',$startDate);
+                    $dayInterval = Carbon::now()->subDay($d);
+                    $userNumber = $userNumber->where('created_at', '>=',$dayInterval);
                 }
             }elseif($type==5){
-                //custom date data
+                $userNumber = $userNumber->whereBetween('created_at',[$from,$to]);
             }
             
             if($request->search){
             	$userNumber = $userNumber->where('name','like','%'.$request->search.'%')
             	                ->orWhere('phone','like','%'.$request->search.'%');
+            }
+            if($request->master_id) {
+                $masterId = intval($request->master_id);
+                $userNumber = $userNumber->where('user_id','=',$masterId);
             }    
             $userNumberData = $userNumber->select('_id','user_id','is_saved','is_called')->paginate($pagination);
             $userIds = array_unique($userNumberData->pluck('user_id')->toArray());
@@ -150,6 +156,20 @@ class UserNumberController extends BaseController
         }catch(Exception $e){
             return $this->sendError('Validation Error.', 'something went wrong,please try again later',401);  
         }
+    }
+
+    public function masterList(Request $request)
+    {
+        try {
+            $authId = $request->id;
+            if($authId) {
+                $masterList = User::select('id','userid','name')->where('client_parent_id', $authId)->get();
+                return $this->sendResponse($masterList, 'Master list.');
+            }
+        }catch(Exception $e){
+            return $this->sendError('Validation Error.', 'something went wrong,please try again later',500);  
+        }
+        
     }
 
 }

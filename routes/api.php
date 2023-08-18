@@ -68,5 +68,6 @@ Route::prefix('admin')->group(function () {
         Route::post('/is-saved', [UserNumberController::class, 'isSaved']);    
         Route::post('/is-called', [UserNumberController::class, 'isCalled']);    
         Route::get('/filter-by-date', [UserNumberController::class, 'dateFilter']);    
+        Route::get('/master-list', [UserNumberController::class, 'masterList']);    
     });
 });
