@@ -45,7 +45,7 @@ class UserNumberController extends BaseController
             
             if($request->search){
             	$userNumber = $userNumber->where('name','like','%'.$request->search.'%')
-            	                ->orWhere('country','like','%'.$request->search.'%');
+            	                ->orWhere('phone','like','%'.$request->search.'%');
             }    
             $userNumberData = $userNumber->select('_id','user_id','is_saved','is_called')->paginate($pagination);
             $userIds = array_unique($userNumberData->pluck('user_id')->toArray());

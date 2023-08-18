@@ -21,6 +21,7 @@ class UserNumber extends Model
         'promo_code',
         'is_saved',
         'is_called',
+        'phone',
         'created_at',
         'updated_at'
     ];
