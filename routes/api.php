@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\PaymentMethodController;
 use App\Http\Controllers\Api\Admin\PosterController;
 use App\Http\Controllers\Api\Admin\SocialMediaController;
 use App\Http\Controllers\Api\Admin\WalletLimitController;
+use App\Http\Controllers\Api\Admin\UserNumberController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -36,8 +37,6 @@ Route::prefix('bank')->group(function () {
     Route::post('/update-bank-status', [BankController::class, 'updateBankStatus']);
     Route::post('/search', [BankController::class, 'search']);
     Route::post('/delete-all', [BankController::class, 'deleteAll']);
-
-
 });
 
 Route::prefix('payment-method')->group(function () {
@@ -61,5 +60,13 @@ Route::prefix('admin')->group(function () {
     Route::prefix('wallet-limit')->group(function () {
         Route::post('/create', [WalletLimitController::class, 'create']);        
         Route::get('/list', [WalletLimitController::class, 'getWalletLimitData']);    
-    });   
+    });
+    
+    Route::prefix('user-number')->group(function () {
+        Route::post('/create', [UserNumberController::class, 'create']);        
+        Route::get('/list', [UserNumberController::class, 'userNumberList']);
+        Route::post('/is-saved', [UserNumberController::class, 'isSaved']);    
+        Route::post('/is-called', [UserNumberController::class, 'isCalled']);    
+        Route::get('/filter-by-date', [UserNumberController::class, 'dateFilter']);    
+    });
 });
