@@ -9,6 +9,8 @@ use App\Http\Controllers\Api\Admin\PosterController;
 use App\Http\Controllers\Api\Admin\SocialMediaController;
 use App\Http\Controllers\Api\Admin\WalletLimitController;
 use App\Http\Controllers\Api\Admin\CheaterUserController;
+use App\Http\Controllers\Api\User\GetIdController;
+use App\Http\Controllers\Api\User\BankAccountController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -65,3 +67,21 @@ Route::prefix('admin')->group(function () {
         Route::delete('/delete/{id}', [CheaterUserController::class, 'delete']);
     });   
 });
+
+Route::prefix('user')->group(function () {
+    Route::get('/bank-list', [BankAccountController::class, 'bankList']);
+    
+    Route::prefix('wallet')->group(function () {
+        Route::get('/history', [GetIdController::class, 'walletHistory']);
+        Route::post('/withdraw-request', [GetIdController::class, 'withdrawRequest']);
+        Route::post('/deposit-request', [GetIdController::class, 'depositRequest']);
+    });
+
+    Route::prefix('accounts')->group(function () {
+        Route::post('/create', [BankAccountController::class, 'create']);
+        Route::get('/list', [BankAccountController::class, 'list']);
+    });
+
+});
+
+
