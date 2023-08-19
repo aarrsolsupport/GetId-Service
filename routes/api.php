@@ -8,6 +8,9 @@ use App\Http\Controllers\Api\PaymentMethodController;
 use App\Http\Controllers\Api\Admin\PosterController;
 use App\Http\Controllers\Api\Admin\SocialMediaController;
 use App\Http\Controllers\Api\Admin\WalletLimitController;
+use App\Http\Controllers\Api\Admin\CheaterUserController;
+use App\Http\Controllers\Api\User\GetIdController;
+use App\Http\Controllers\Api\User\BankAccountController;
 use App\Http\Controllers\Api\Admin\UserNumberController;
 /*
 |--------------------------------------------------------------------------
@@ -60,8 +63,29 @@ Route::prefix('admin')->group(function () {
     Route::prefix('wallet-limit')->group(function () {
         Route::post('/create', [WalletLimitController::class, 'create']);        
         Route::get('/list', [WalletLimitController::class, 'getWalletLimitData']);    
+    }); 
+
+    Route::prefix('cheater-user')->group(function () {
+        Route::get('/list', [CheaterUserController::class, 'list']);    
+        Route::post('/create', [CheaterUserController::class, 'create']);        
+        Route::delete('/delete/{id}', [CheaterUserController::class, 'delete']);
+    });   
+
+    Route::prefix('user')->group(function () {
+        Route::get('/bank-list', [BankAccountController::class, 'bankList']);
+        
+        Route::prefix('wallet')->group(function () {
+            Route::get('/history', [GetIdController::class, 'walletHistory']);
+            Route::post('/withdraw-request', [GetIdController::class, 'withdrawRequest']);
+            Route::post('/deposit-request', [GetIdController::class, 'depositRequest']);
+        });
+
+        Route::prefix('accounts')->group(function () {
+            Route::post('/create', [BankAccountController::class, 'create']);
+            Route::get('/list', [BankAccountController::class, 'list']);
+        });
+
     });
-    
     Route::prefix('user-number')->group(function () {
         Route::post('/create', [UserNumberController::class, 'create']);        
         Route::get('/list', [UserNumberController::class, 'userNumberList']);
@@ -71,3 +95,5 @@ Route::prefix('admin')->group(function () {
         Route::get('/master-list', [UserNumberController::class, 'masterList']);    
     });
 });
+
+

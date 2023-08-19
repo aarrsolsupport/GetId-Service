@@ -9,6 +9,18 @@ use Illuminate\Support\Facades\Storage;
 
 class BaseController extends Controller
 {
+    private $getId_request_types = [
+        2 => 'Deposit',
+        3 => 'Withdraw',
+    ];
+
+    private $getId_request_status = [
+        0 => 'Pending',
+        1 => 'Accepted',
+        2 => 'Rejected',
+        3 => 'Cancelled',
+    ];
+
     /**
      * success response method.
      *
@@ -22,7 +34,6 @@ class BaseController extends Controller
         ];
         return response()->json($response, 200);
     }
-
 
     /**
      * return error response.

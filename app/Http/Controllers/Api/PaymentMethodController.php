@@ -29,7 +29,7 @@ class PaymentMethodController extends BaseController
                             ->paginate($paginate);
             return $this->sendResponse($methods, 'success');
         }catch(Exception $e){
-            return $this->sendError('Validation Error.', 'Something went wrong.Please try again later.',401);  
+            return $this->sendError('Error.', 'Something went wrong.Please try again later.',401);  
         }
     }
 
@@ -65,7 +65,7 @@ class PaymentMethodController extends BaseController
             $res  = PaymentMethod::create($data);
             return $this->sendResponse($res, 'Payment method inserted successfully.');
         }catch(Exception $e){
-            return $this->sendError('Validation Error.', 'Something went wrong.Please try again later.',401);  
+            return $this->sendError('Error.', 'Something went wrong.Please try again later.',401);  
         }
     }
 
@@ -103,7 +103,7 @@ class PaymentMethodController extends BaseController
             }
             return $this->sendResponse($response, 'Payment method updated successfully.');
         }catch(Exception $e){
-            return $this->sendError('Validation Error.', 'Something went wrong.Please try again later.',401);  
+            return $this->sendError('Error.', 'Something went wrong.Please try again later.',401);  
         }
     }    
 
