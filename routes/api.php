@@ -79,7 +79,8 @@ Route::prefix('user')->group(function () {
 
     Route::prefix('accounts')->group(function () {
         Route::post('/create', [BankAccountController::class, 'create']);
-        Route::get('/list', [BankAccountController::class, 'list']);
+        Route::post('/create-upi', [BankAccountController::class, 'createUpiAccount']);
+        Route::get('/list/{id}', [BankAccountController::class, 'list']);
     });
 
 });

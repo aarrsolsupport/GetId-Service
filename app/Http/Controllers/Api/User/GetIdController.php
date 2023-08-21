@@ -38,7 +38,7 @@ class GetIdController extends BaseController
                 'bank_account_id'   => 'required',  
                 'user_id'           => 'required',
                 'parent_id'         => 'required',
-                'stack'             => 'required|numeric',
+                'stack'             => 'required|numeric|min:100',
             ],[
                 'bank_account_id.required'  => 'Bank name field is required.',
                 'user_id.required'          => 'Something went wrong. Please try again later.',
