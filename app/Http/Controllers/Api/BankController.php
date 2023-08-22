@@ -48,7 +48,8 @@ class BankController extends BaseController
 	 * @return void
 	 */
 	public function create(Request $request){
-        try{            
+        try{
+                        
             if($request->hasFile('icon')) {
                 $iconName           = $request->icon;
                 $filenamewithExt    = $iconName->getClientOriginalName();

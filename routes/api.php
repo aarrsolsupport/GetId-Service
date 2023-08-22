@@ -69,23 +69,8 @@ Route::prefix('admin')->group(function () {
         Route::get('/list', [CheaterUserController::class, 'list']);    
         Route::post('/create', [CheaterUserController::class, 'create']);        
         Route::delete('/delete/{id}', [CheaterUserController::class, 'delete']);
-    });   
-
-    Route::prefix('user')->group(function () {
-        Route::get('/bank-list', [BankAccountController::class, 'bankList']);
-        
-        Route::prefix('wallet')->group(function () {
-            Route::get('/history', [GetIdController::class, 'walletHistory']);
-            Route::post('/withdraw-request', [GetIdController::class, 'withdrawRequest']);
-            Route::post('/deposit-request', [GetIdController::class, 'depositRequest']);
-        });
-
-        Route::prefix('accounts')->group(function () {
-            Route::post('/create', [BankAccountController::class, 'create']);
-            Route::get('/list', [BankAccountController::class, 'list']);
-        });
-
     });
+
     Route::prefix('user-number')->group(function () {
         Route::post('/create', [UserNumberController::class, 'create']);        
         Route::get('/list', [UserNumberController::class, 'userNumberList']);
@@ -94,6 +79,26 @@ Route::prefix('admin')->group(function () {
         Route::get('/filter-by-date', [UserNumberController::class, 'dateFilter']);    
         Route::get('/master-list', [UserNumberController::class, 'masterList']);    
     });
+    
 });
 
+Route::prefix('user')->group(function () {
+    Route::get('/bank-list', [BankAccountController::class, 'bankList']);
+    Route::get('/payment-method-list', [BankAccountController::class, 'paymentMethodList']);
+
+    
+    Route::prefix('wallet')->group(function () {
+        Route::get('/history', [GetIdController::class, 'walletHistory']);
+        Route::post('/withdraw-request', [GetIdController::class, 'withdrawRequest']);
+        Route::post('/deposit-request', [GetIdController::class, 'depositRequest']);
+        Route::get('/tranactionData', [GetIdController::class, 'walletTransactionDetail']);
+    });
+
+    Route::prefix('accounts')->group(function () {
+        Route::post('/create', [BankAccountController::class, 'create']);
+        Route::get('/list', [BankAccountController::class, 'list']);
+    });
+
+});
+   
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\User;
 use App\Http\Controllers\API\BaseController as BaseController;
 use App\Http\Controllers\Controller;
 use App\Models\User\BankAccount;
+use App\Models\PaymentMethod;
 use Illuminate\Http\Request;
 use App\Models\Bank;
 use Carbon\Carbon;
@@ -62,6 +63,16 @@ class BankAccountController extends BaseController
             $res  = BankAccount::create($requestData);
             return $this->sendResponse($res, 'Bank added successfully.');
         }catch(Exception $e){
+            return $this->sendError('Error.', 'Something went wrong.Please try again later.',401);  
+        }
+    }
+
+    public function paymentMethodList() 
+    {
+        try{
+            $paymentMethodData = PaymentMethod::select('_id','name','icon')->where('is_active',1)->get();
+            return $this->sendResponse($paymentMethodData, 'Payment method data.');
+        } catch(Exception $e){
             return $this->sendError('Error.', 'Something went wrong.Please try again later.',401);  
         }
     }
