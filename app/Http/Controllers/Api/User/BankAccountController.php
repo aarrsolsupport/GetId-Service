@@ -29,6 +29,7 @@ class BankAccountController extends BaseController
     public function list($id){
         if($id){
             $data = BankAccount::where('user_id',$id)
+                        ->where('is_active',1)
                         ->orderBy('created_at','desc')
                         ->get();
             return $this->sendResponse($data, 'success');
@@ -113,6 +114,21 @@ class BankAccountController extends BaseController
             $requestData['is_active'] = 1;
             $res  = BankAccount::create($requestData);
             return $this->sendResponse($res, 'Bank UPI Account added successfully.');
+        }catch(Exception $e){
+            return $this->sendError('Error.', 'Something went wrong.Please try again later.',401);  
+        }
+    }
+
+    public function delete(Request $request){
+        try{           
+            $res  = BankAccount::find($request->id);
+            if($res){
+                $res->is_active = 0;
+                $res->save();
+                return $this->sendResponse([], 'Bank account deleted successfully.');
+            }else{
+                return $this->sendError('Error.', 'Something went wrong.Please try again later.',401);  
+            }
         }catch(Exception $e){
             return $this->sendError('Error.', 'Something went wrong.Please try again later.',401);  
         }

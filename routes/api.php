@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\Admin\WalletLimitController;
 use App\Http\Controllers\Api\Admin\CheaterUserController;
 use App\Http\Controllers\Api\User\GetIdController;
 use App\Http\Controllers\Api\User\BankAccountController;
+use App\Http\Controllers\Api\Agent\BankController as AgentBankController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -81,8 +82,16 @@ Route::prefix('user')->group(function () {
         Route::post('/create', [BankAccountController::class, 'create']);
         Route::post('/create-upi', [BankAccountController::class, 'createUpiAccount']);
         Route::get('/list/{id}', [BankAccountController::class, 'list']);
+        Route::post('/delete', [BankAccountController::class, 'delete']);
     });
+});
 
+Route::prefix('agent')->group(function () {
+    Route::prefix('accounts')->group(function () {
+        Route::get('/list', [AgentBankController::class, 'list']);
+        Route::post('/create', [AgentBankController::class, 'create']);
+        Route::get('/delete/{id}/{user_id}', [AgentBankController::class, 'delete']);
+    });
 });
 
 
