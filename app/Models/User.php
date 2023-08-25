@@ -13,6 +13,7 @@ use App\Models\UserNumber;
 use Auth;
 use DB;
 
+
 class User extends Authenticatable
 {
 	use Notifiable;
@@ -148,7 +149,7 @@ class User extends Authenticatable
 	public static function allClientsOfMineByKeywords($loggedIn_id, $search)
 	{
 		$proxydbconnection 	= 	dbProxyConnectionMain();
-		if($loggedIn_id == 1) {
+		if ($loggedIn_id == 1) {
 			return $proxydbconnection->table('users')->select('id', 'userid', 'role_id')->where('userid', 'LIKE', '%' . $search . '%')->take(20)->get();
 		}
 		return $proxydbconnection->table('users')->select('id', 'userid', 'role_id')->whereRaw("FIND_IN_SET($loggedIn_id, parents)")->where('userid', 'LIKE', '%' . $search . '%')->take(20)->get();
@@ -485,5 +486,10 @@ class User extends Authenticatable
 	public function user_number()
 	{
 		return $this->hasOne(UserNumber::class, 'user_id', 'id');
+	}
+
+	public function user_request_get_id()
+	{
+		return $this->hasMany(UserRequestForGetId::class, 'user_id', 'id');
 	}
 }

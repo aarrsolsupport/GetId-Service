@@ -8,6 +8,12 @@ use App\Models\User\GetId;
 use App\Models\User\BankAccount;
 use Carbon\Carbon;
 use DB, Validator;
+use App\Models\AdminAccounts; // MySQL model
+use MongoDB\Client as MongoDBClient; // MongoDB Client
+use Illuminate\Support\Collection;
+use App\Models\PaymentMethod;
+use App\Models\UserRequestForGetId;
+use App\Models\User;
 
 class GetIdController extends BaseController
 {
@@ -116,8 +122,9 @@ class GetIdController extends BaseController
                 $requestData['document'] = $request->file;
                 unset($requestData['file']);
             }
-            $requestData['type']      = 2;
+            //$requestData['type']      = 2;
             $requestData['status']    = 0;
+            $request['admin_account_id'] = $request->requestData;
             $res  = GetId::create($requestData);
             return $this->sendResponse($res, 'Your Deposit request sent successfully.');
         } catch (Exception $e) {
@@ -144,5 +151,26 @@ class GetIdController extends BaseController
         } catch (Exception $e) {
             return $this->sendError('Error.', 'Something went wrong.Please try again later.', 401);
         }
+    }
+
+    public function test()
+    {
+
+        $adminAccounts = AdminAccounts::with('payment', 'banks')->where('user_id', 2)->get();
+        $accounts = [];
+        $data = [];
+        foreach ($adminAccounts as $key => $val) {
+            $accounts[$val->type][] = $val;
+        }
+
+
+        // $adminAccounts = AdminAccounts::where('user_id', 2)->get();
+        dd($accounts);
+
+        /*
+        this query is for user deposti screen
+        $query = UserRequestForGetId::with('userRecord')->where('user_id', 6797)->first();
+        dd($query);
+        */
     }
 }
