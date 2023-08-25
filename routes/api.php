@@ -91,6 +91,7 @@ Route::prefix('agent')->group(function () {
         Route::get('/list', [AgentBankController::class, 'list']);
         Route::post('/create', [AgentBankController::class, 'create']);
         Route::get('/delete/{id}/{user_id}', [AgentBankController::class, 'delete']);
+        Route::post('/status', [AgentBankController::class, 'updateStatus']);
     });
 });
 
