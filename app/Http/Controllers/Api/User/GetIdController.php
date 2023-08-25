@@ -122,7 +122,7 @@ class GetIdController extends BaseController
                 $requestData['document'] = $request->file;
                 unset($requestData['file']);
             }
-            //$requestData['type']      = 2;
+            $requestData['type']      = 2; // deposit
             $requestData['status']    = 0;
             $request['admin_account_id'] = $request->requestData;
             $res  = GetId::create($requestData);
