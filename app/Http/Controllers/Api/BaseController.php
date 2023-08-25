@@ -20,7 +20,7 @@ class BaseController extends Controller
         2 => 'Rejected',
         3 => 'Cancelled',
     ];
-
+    
     /**
      * success response method.
      *

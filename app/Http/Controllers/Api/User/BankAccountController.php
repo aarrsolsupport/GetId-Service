@@ -31,6 +31,18 @@ class BankAccountController extends BaseController
         }
     }
 
+    // public function list($id)
+    // {
+    //     if ($id) {
+    //         $data = BankAccount::where('user_id', $id)
+    //             ->where('is_active', 1)
+    //             ->orderBy('created_at', 'desc')
+    //             ->get();
+    //         return $this->sendResponse($data, 'success');
+    //     }
+    //     return $this->sendError('Error.', 'Something went wrong.Please try again later.', 401);
+    // }
+
     public function list(Request $request)
     {
         if ($request->user_id) {
@@ -50,12 +62,68 @@ class BankAccountController extends BaseController
         try {
             $requestData = $request->all();
             $validator   = Validator::make($requestData, [
-                'bank_id' => 'required',
-                'user_id' => 'required',
+                'account_no' => [
+                    'required', 'max:128', 'min:2',
+                    function ($attribute, $value, $fail) {
+                        $existingMethod = BankAccount::where('account_no', $value)->first();
+
+                        if ($existingMethod) {
+                            $fail('This account no. has already been added.');
+                        }
+                    },
+                ],
+                'country'               => 'required',
+                'bank_name'             => 'required',
+                'account_holder_name'   => 'required|min:2',
+                'user_id'               => 'required',
             ], [
-                'bank_id.required'  => 'Bank name field is required.',
-                'user_id.required'  => 'Something went wrong. Please try again later.',
+                'country.required'      => 'Please select country name.',
+                'bank_name.required'    => 'Please select bank name.',
+                'user_id.required'      => 'Something went wrong. Please try again later.',
             ]);
+
+            if ($validator->fails()) {
+                return $this->sendError('Validation Error.', $validator->errors()->first(), 422);
+            }
+            $requestData['is_active'] = 1;
+            $res  = BankAccount::create($requestData);
+            return $this->sendResponse($res, 'Bank Account added successfully.');
+        } catch (Exception $e) {
+            return $this->sendError('Error.', 'Something went wrong.Please try again later.', 401);
+        }
+    }
+
+    public function createUpiAccount(Request $request)
+    {
+        try {
+            $requestData = $request->all();
+            $validator   = Validator::make($requestData, [
+                'account_no' => [
+                    'required', 'max:128', 'min:2',
+                    function ($attribute, $value, $fail) {
+                        $existingMethod = BankAccount::where('account_no', $value)->first();
+
+                        if ($existingMethod) {
+                            $fail('This account no. has already been added.');
+                        }
+                    },
+                ],
+                'upi_id' => [
+                    'required', 'max:128', 'min:2',
+                    function ($attribute, $value, $fail) {
+                        $existingMethod = BankAccount::where('upi_id', $value)->first();
+
+                        if ($existingMethod) {
+                            $fail('This UPI id has already been taken.');
+                        }
+                    },
+                ],
+                'account_holder_name'   => 'required|min:2',
+                'user_id'               => 'required',
+            ], [
+                'user_id.required'      => 'Something went wrong. Please try again later.',
+            ]);
+
 
             if ($validator->fails()) {
                 return $this->sendError('Validation Error.', $validator->errors()->first(), 422);
@@ -67,7 +135,23 @@ class BankAccountController extends BaseController
             }
             $requestData['is_active'] = 1;
             $res  = BankAccount::create($requestData);
-            return $this->sendResponse($res, 'Bank added successfully.');
+            return $this->sendResponse($res, 'Bank UPI Account added successfully.');
+        } catch (Exception $e) {
+            return $this->sendError('Error.', 'Something went wrong.Please try again later.', 401);
+        }
+    }
+
+    public function delete(Request $request)
+    {
+        try {
+            $res  = BankAccount::find($request->id);
+            if ($res) {
+                $res->is_active = 0;
+                $res->save();
+                return $this->sendResponse([], 'Bank account deleted successfully.');
+            } else {
+                return $this->sendError('Error.', 'Something went wrong.Please try again later.', 401);
+            }
         } catch (Exception $e) {
             return $this->sendError('Error.', 'Something went wrong.Please try again later.', 401);
         }
