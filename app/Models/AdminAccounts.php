@@ -44,10 +44,19 @@ class AdminAccounts extends Model
         'label4',
     ];
 
+    public function getQrCodeAttribute($value)
+    {
+        if ($value) {
+            $prefix = 'https://victorybucket-new.s3.ap-south-1.amazonaws.com/staging/agent-bank-qrcode/';
+            return $prefix . '' . $value;
+        } else {
+            return public_path('images/no_image.png');
+        }
+    }
+
 
     public function payment()
     {
-        //dd(PaymentMethod::with('')->where('_id', '64d0d8a83146000069002def')->get());
         return $this->belongsTo(PaymentMethod::class,  'payment_method_id', '_id');
     }
 
