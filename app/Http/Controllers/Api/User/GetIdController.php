@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers\Api\User;
 use App\Http\Controllers\API\BaseController as BaseController;
+use App\Models\User\UserFirstWithdrawDepositRequest;
+use App\Models\User\BankAccount;
 use Illuminate\Http\Request;
 use App\Models\User\GetId;
-use App\Models\User\BankAccount;
 use Carbon\Carbon;
 use DB,Validator;
 
@@ -51,7 +52,16 @@ class GetIdController extends BaseController
             $requestData['type']      = 3;
             $requestData['status']    = 0;
             $res  = GetId::create($requestData);
-            return $this->sendResponse($res, 'Your Withdraw request sent successfully.');
+            if($res){
+                $isfirst = UserFirstWithdrawDepositRequest::where(['user_id'=>$request->user_id,'parent_id'=>$request->parent_id,'type'=>3])->first();
+                if($isfirst==null){
+                    $datavalue = array('user_id'=>$request->user_id,'parent_id'=>$request->parent_id,'type'=>3);
+                    UserFirstWithdrawDepositRequest::create($datavalue);
+                }
+                return $this->sendResponse($res, 'Your Withdraw request sent successfully.');
+            }else{
+                return $this->sendError('Error.', 'Something went wrong.Please try again later.',401);  
+            }
         }catch(Exception $e){
             return $this->sendError('Error.', 'Something went wrong.Please try again later.',401);  
         }

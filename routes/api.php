@@ -12,6 +12,8 @@ use App\Http\Controllers\Api\Admin\CheaterUserController;
 use App\Http\Controllers\Api\User\GetIdController;
 use App\Http\Controllers\Api\User\BankAccountController;
 use App\Http\Controllers\Api\Agent\BankController as AgentBankController;
+use App\Http\Controllers\Api\Agent\NotificationController;
+use App\Http\Controllers\Api\Agent\MoniteringReportController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -92,6 +94,14 @@ Route::prefix('agent')->group(function () {
         Route::post('/create', [AgentBankController::class, 'create']);
         Route::get('/delete/{id}/{user_id}', [AgentBankController::class, 'delete']);
         Route::post('/status', [AgentBankController::class, 'updateStatus']);
+    });
+    
+    Route::post('/notifi-to-me', [NotificationController::class, 'create']);
+    Route::get('/notification-send', [NotificationController::class, 'sendPushNotification']);
+
+    Route::prefix('monitering-report')->group(function () {
+        Route::get('/user-create-count', [MoniteringReportController::class, 'userCreateCountList']);
+        Route::get('/first-deposit-count', [MoniteringReportController::class, 'firstDepositCountList']);
     });
 });
 
