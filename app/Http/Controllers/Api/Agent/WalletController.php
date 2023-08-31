@@ -23,7 +23,6 @@ class WalletController extends BaseController
             $type = $request->date_type;
             $from = Carbon::create($request->from_date) . ' 00:00:00';
             $to = Carbon::create($request->to_date) . ' 23:59:59';
-            //dd($request->all());
             if ($request->type != '') {
                 $walletData = $walletData->where('type', intval($request->type));
             }
@@ -54,6 +53,34 @@ class WalletController extends BaseController
             }
             $walletData = $walletData->paginate($pagination);
             return $this->sendResponse($walletData, 'success');
+        } catch (Exception $e) {
+            return $this->sendError('Validation Error.', 'Something went wrong.Please try again later.', 401);
+        }
+    }
+
+    /**
+     * Method wallet request approve/reject by agent API
+     *
+     * @param Request $request [explicite description]
+     *
+     * @return void
+     */
+    public function requestReject(Request $request)
+    {
+        try {
+            if ($request->id && $request->remarks) {
+                $res  =  GetId::where(['_id' => $request->id])->update(['status' => (int) $request->status, 'remarks' => $request->remarks]);
+                $resultData = array(
+                    'id' => $request->id,
+                    'remarks' => $request->remarks,
+                    'status' => $request->status,
+                );
+                if ($res) {
+                    return $this->sendResponse($resultData, 'Status has been updated successfully.');
+                } else {
+                    return $this->sendError('Error.', 'Something went wrong.Please try again later.', 401);
+                }
+            }
         } catch (Exception $e) {
             return $this->sendError('Validation Error.', 'Something went wrong.Please try again later.', 401);
         }

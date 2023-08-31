@@ -114,6 +114,7 @@ Route::prefix('agent')->group(function () {
 
     Route::prefix('wallet-deposit')->group(function () {
         Route::get('/list', [AgentWalletController::class, 'list']);
+        Route::post('/reject', [AgentWalletController::class, 'requestReject']);
         // Route::post('/create', [AgentBankController::class, 'create']);
         // Route::get('/delete/{id}/{user_id}', [AgentBankController::class, 'delete']);
         // Route::post('/status', [AgentBankController::class, 'updateStatus']);
