@@ -104,12 +104,12 @@ class GetIdController extends BaseController
         try {
             $requestData = $request->all();
             $validator   = Validator::make($requestData, [
-                'bank_account_id'   => 'required',
+                //'bank_account_id'   => 'required',
                 'user_id'           => 'required',
                 'parent_id'         => 'required',
                 'stake'             => 'required|numeric',
             ], [
-                'bank_account_id.required'  => 'Bank name field is required.',
+                //'bank_account_id.required'  => 'Bank name field is required.',
                 'user_id.required'          => 'Something went wrong. Please try again later.',
                 'parent_id.required'        => 'Something went wrong. Please try again later.',
             ]);
@@ -144,7 +144,7 @@ class GetIdController extends BaseController
         try {
             $userId = $request->user_id;
             $id = $request->id;
-            $data = GetId::where('_id', $id)->first();
+            $data = GetId::with('adminBank')->where('_id', $id)->first();
             if ($data) {
                 return $this->sendResponse($data, 'Wallet history transaction record.');
             }

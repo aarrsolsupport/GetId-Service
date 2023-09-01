@@ -168,7 +168,6 @@ class BankAccountController extends BaseController
                     $paymentMethods[$val->type][] = $val;
                 }
             }
-
             return $this->sendResponse($paymentMethods, 'Payment method data.');
         } catch (Exception $e) {
             return $this->sendError('Error.', 'Something went wrong.Please try again later.', 401);
