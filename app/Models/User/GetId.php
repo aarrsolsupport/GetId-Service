@@ -4,6 +4,7 @@ namespace App\Models\User;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Jenssegers\Mongodb\Eloquent\Model;
+use App\Models\User;
 
 class GetId extends Model
 {
@@ -20,5 +21,9 @@ class GetId extends Model
         }else{
             return public_path('images/no_image.png');
         }
+    }
+
+    public function user(){
+        return $this->belongsTo(User::class,'user_id','id');
     }
 }

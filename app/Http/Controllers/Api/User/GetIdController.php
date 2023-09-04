@@ -51,11 +51,18 @@ class GetIdController extends BaseController
             }
             $requestData['type']      = 3;
             $requestData['status']    = 0;
+            $requestData['stack']     = (floatval($request->stack));
             $res  = GetId::create($requestData);
             if($res){
                 $isfirst = UserFirstWithdrawDepositRequest::where(['user_id'=>$request->user_id,'parent_id'=>$request->parent_id,'type'=>3])->first();
                 if($isfirst==null){
-                    $datavalue = array('user_id'=>$request->user_id,'parent_id'=>$request->parent_id,'type'=>3);
+                    $datavalue = array(
+                        'user_id'   => $request->user_id,
+                        'parent_id' => $request->parent_id,
+                        'type'      => 3,
+                        'amount'    => (floatval($request->stack)),
+                        'getid_request_id'  => $res->id,
+                    );
                     UserFirstWithdrawDepositRequest::create($datavalue);
                 }
                 return $this->sendResponse($res, 'Your Withdraw request sent successfully.');
@@ -98,5 +105,4 @@ class GetIdController extends BaseController
             return $this->sendError('Error.', 'Something went wrong.Please try again later.',401);  
         }
     }
-
 }

@@ -7,7 +7,7 @@ use App\Http\Controllers\Controller as Controller;
 use Illuminate\Support\Facades\Storage;
 
 
-class BaseController extends Controller
+class   BaseController extends Controller
 {
     private $getId_request_types = [
         2 => 'Deposit',

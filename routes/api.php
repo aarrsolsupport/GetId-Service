@@ -102,7 +102,15 @@ Route::prefix('agent')->group(function () {
     Route::prefix('monitering-report')->group(function () {
         Route::get('/user-create-count', [MoniteringReportController::class, 'userCreateCountList']);
         Route::get('/first-deposit-count', [MoniteringReportController::class, 'firstDepositCountList']);
+        Route::get('/total-amount-of-first-time-deposit', [MoniteringReportController::class, 'totalAmountOfFirstTimeDeposit']);
+        Route::get('/recurring-deposit-count', [MoniteringReportController::class, 'recurringDepositCount']);
+        Route::get('/total-amount-deposit', [MoniteringReportController::class, 'userTotalDepositAmounts']);
+        Route::get('/total-amount-withdraw', [MoniteringReportController::class, 'userTotalWithdrawAmounts']);
+        Route::get('/profit-loss', [MoniteringReportController::class, 'profitLoss']);
     });
+
+    Route::get('/test-data', [MoniteringReportController::class, 'testingData']);
+
 });
 
 

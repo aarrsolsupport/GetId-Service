@@ -4,6 +4,7 @@ namespace App\Models\User;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Jenssegers\Mongodb\Eloquent\Model;
+use App\Models\User;
 
 class UserFirstWithdrawDepositRequest extends Model
 {
@@ -12,5 +13,7 @@ class UserFirstWithdrawDepositRequest extends Model
     protected $collection   = 'user_first_wd_depo_request_getid';
     protected $guarded     = [];
 
-
+    public function user(){
+        return $this->belongsTo(User::class,'user_id','id');
+    }
 }
