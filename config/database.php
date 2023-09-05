@@ -56,7 +56,7 @@ return [
             'collation' => 'utf8mb4_unicode_ci',
             'prefix' => '',
             'prefix_indexes' => true,
-            'strict' => true,
+            'strict' => false,
             'engine' => null,
             'options' => extension_loaded('pdo_mysql') ? array_filter([
                 PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
@@ -69,7 +69,7 @@ return [
             'database'      =>  env('MONGO_DB_DATABASE', 'forge'),
             'username'      =>  env('MONGO_DB_USERNAME', ''),
             'password'      =>  env('MONGO_DB_PASSWORD', ''),
-        ],  
+        ],
 
         'pgsql' => [
             'driver' => 'pgsql',
@@ -97,6 +97,19 @@ return [
             'charset' => 'utf8',
             'prefix' => '',
             'prefix_indexes' => true,
+        ],
+        'mongodb' => [
+            'driver'        =>  env('MONGO_DB_DRIVER', 'mongodb'),
+            'host'          =>  env('MONGO_DB_HOST', '127.0.0.1'),
+            'port'          =>  env('MONGO_DB_PORT', '27017'),
+            'database'      =>  env('MONGO_DB_DATABASE', 'forge'),
+            'username'      =>  env('MONGO_DB_USERNAME', ''),
+            'password'      =>  env('MONGO_DB_PASSWORD', ''),
+            // 'options'       =>  [
+            //                         'tls'           =>  env('MONGO_DB_TLS', false),
+            //                         'tlsCAFile'     =>  public_path('mongodb/rds-combined-ca-bundle.pem')
+            //                         //'database' => 'admin'
+            //                     ],
         ],
 
     ],
@@ -131,7 +144,7 @@ return [
 
         'options' => [
             'cluster' => env('REDIS_CLUSTER', 'redis'),
-            'prefix' => env('REDIS_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_').'_database_'),
+            'prefix' => env('REDIS_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_') . '_database_'),
         ],
 
         'default' => [
