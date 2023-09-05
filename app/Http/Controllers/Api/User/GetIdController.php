@@ -124,7 +124,8 @@ class GetIdController extends BaseController
             }
             $requestData['type']      = 2; // deposit
             $requestData['status']    = 0;
-            $request['admin_account_id'] = $request->requestData;
+            $requestData['admin_account_id'] = $request->admin_account_id;
+            $requestData['utr_number'] = $request->utr_number;
             $res  = GetId::create($requestData);
             return $this->sendResponse($res, 'Your Deposit request sent successfully.');
         } catch (Exception $e) {
