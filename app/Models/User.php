@@ -47,4 +47,8 @@ class User extends Authenticatable
     public function userFirstDetails(){
         return $this->hasOne(UserFirstWithdrawDepositRequest::class,'user_id','id');
     }
+
+    public function parent(){
+         return $this->belongsTo(User::class, 'client_parent_id');
+    }
 }

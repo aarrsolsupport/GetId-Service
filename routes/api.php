@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\User\BankAccountController;
 use App\Http\Controllers\Api\Agent\BankController as AgentBankController;
 use App\Http\Controllers\Api\Agent\NotificationController;
 use App\Http\Controllers\Api\Agent\MoniteringReportController;
+use App\Http\Controllers\Api\SubAdmin\MoniteringReportController as SubAdminMoniteringReportController ;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -69,6 +70,12 @@ Route::prefix('admin')->group(function () {
         Route::post('/create', [CheaterUserController::class, 'create']);        
         Route::delete('/delete/{id}', [CheaterUserController::class, 'delete']);
     });   
+});
+
+Route::prefix('sub-admin')->group(function () {
+    Route::prefix('monitering-report')->group(function () {
+        Route::get('/user-create-count', [SubAdminMoniteringReportController::class, 'userCreateCountList']);
+    });
 });
 
 Route::prefix('user')->group(function () {
