@@ -7,17 +7,14 @@ use Jenssegers\Mongodb\Eloquent\HybridRelations;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\HasApiTokens;
 use App\Models\User\UserFirstWithdrawDepositRequest;
-use App\UserRegistration;
-use App\UserLoginHistory;
-use App\PokerMarketBets;
-use App\Client;
+use App\Models\User\GetId;
 use App\Models\UserNumber;
 use Auth;
 use DB;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, Notifiable;
+    use HasApiTokens, Notifiable,HybridRelations;
     protected $connection = 'mysql';
 
 	/**
@@ -95,8 +92,14 @@ class User extends Authenticatable
         return $this->hasOne(UserFirstWithdrawDepositRequest::class,'user_id','id');
     }
 
+    public function getFirstDeposit(){
+     	return $this->belongsTo(UserFirstWithdrawDepositRequest::class,'id','user_id')
+ 					->where('type',2)
+ 					->orderBy('id','asc');
+    }
+
     public function parent(){
-         return $this->belongsTo(User::class, 'client_parent_id');
+     	return $this->belongsTo(User::class, 'client_parent_id');
     }
 	/**
 	 * The attributes that should be hidden for arrays.

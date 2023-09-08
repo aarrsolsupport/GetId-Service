@@ -167,8 +167,8 @@ class MoniteringReportController extends BaseController
 			$page 		= (int)$request->page?:1;
 			$skip  		= ($page - 1) * $paginate;
 			$match['parent_id'] = $request->parent_id;
-			$match['type'] = 2;
-			$match['status'] = 1;
+			$match['type'] 		= 2;
+			$match['status'] 	= 1;
 			if($request->search && $request->search!='all'){
 				$match['created_at'] = [
 					'$gte' 	=> new \MongoDB\BSON\UTCDateTime(Carbon::createFromFormat("Y-m-d H:i:s", $request->from)->startOfDay()),
@@ -182,11 +182,11 @@ class MoniteringReportController extends BaseController
 			        [
 			            '$group' => [
 			                '_id' 		  	=> '$user_id',
-			                'totalAmount' 	=> ['$sum' 	=> '$stack'],
+			                'totalAmount' 	=> ['$sum' 	=> '$stake'],
 			                'data' 		  	=> ['$first' 	=> '$$ROOT'],
 			            ],
 			        ],
-			        [ 	'$addFields' 	=> [ "data.totalStack" => '$totalAmount'] ],
+			        [ 	'$addFields' 	=> [ "data.totalStake" => '$totalAmount'] ],
 			        [	'$replaceRoot'	=> ['newRoot' =>'$data'] ],
 			        [ 	'$sort' 		=> ['_id'=>-1] ],
 			        [
@@ -261,11 +261,11 @@ class MoniteringReportController extends BaseController
 			        [
 			            '$group' => [
 			                '_id' 		  	=> '$user_id',
-			                'totalAmount' 	=> ['$sum' 	=> '$stack'],
+			                'totalAmount' 	=> ['$sum' 	=> '$stake'],
 			                'data' 		  	=> ['$first' 	=> '$$ROOT'],
 			            ],
 			        ],
-			        [ 	'$addFields' 	=> [ "data.totalStack" => '$totalAmount'] ],
+			        [ 	'$addFields' 	=> [ "data.totalStake" => '$totalAmount'] ],
 			        [	'$replaceRoot'	=> ['newRoot' =>'$data'] ],
 			        [ 	'$sort' 		=> ['_id'=>-1] ],
 			        [
@@ -332,7 +332,7 @@ class MoniteringReportController extends BaseController
 		                    'user_id' => '$user_id',
 		                    'type' => '$type',
 		                ],
-		                'totalStack' => ['$sum' => '$stack'],
+		                'totalStake' => ['$sum' => '$stake'],
 		            ],
 		        ],
 		        [
@@ -341,7 +341,7 @@ class MoniteringReportController extends BaseController
 		                'typeTotals' => [
 		                    '$push' => [
 		                        'type' => '$_id.type',
-		                        'totalStack' => '$totalStack',
+		                        'totalStake' => '$totalStake',
 		                    ],
 		                ],
 		            ],
@@ -385,14 +385,14 @@ class MoniteringReportController extends BaseController
 		                            'type2Total' => [
 		                                '$cond' => [
 		                                    'if' => ['$eq' => ['$$this.type', 2]],
-		                                    'then' => ['$add' => ['$$value.type2Total', '$$this.totalStack']],
+		                                    'then' => ['$add' => ['$$value.type2Total', '$$this.totalStake']],
 		                                    'else' => '$$value.type2Total',
 		                                ],
 		                            ],
 		                            'type3Total' => [
 		                                '$cond' => [
 		                                    'if' => ['$eq' => ['$$this.type', 3]],
-		                                    'then' => ['$add' => ['$$value.type3Total', '$$this.totalStack']],
+		                                    'then' => ['$add' => ['$$value.type3Total', '$$this.totalStake']],
 		                                    'else' => '$$value.type3Total',
 		                                ],
 		                            ],
@@ -481,7 +481,7 @@ class MoniteringReportController extends BaseController
 	}	
 	
 	public function testingData(Request $request){
-        $datavalue = array('user_id'=>$request->user_id,'parent_id'=>$request->parent_id,'type'=>3,'amount'=>$request->stack);
+        $datavalue = array('user_id'=>$request->user_id,'parent_id'=>$request->parent_id,'type'=>3,'amount'=>$request->stake);
         UserFirstWithdrawDepositRequest::create($datavalue);
     }
 

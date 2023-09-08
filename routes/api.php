@@ -89,6 +89,18 @@ Route::prefix('admin')->group(function () {
 Route::prefix('sub-admin')->group(function () {
     Route::prefix('monitering-report')->group(function () {
         Route::get('/user-create-count', [SubAdminMoniteringReportController::class, 'userCreateCountList']);
+        Route::get('/first-deposit-count', [SubAdminMoniteringReportController::class, 'firstDepositCountList']);
+        Route::get('/recurring-deposit-count', [SubAdminMoniteringReportController::class, 'recurringDepositCount']);
+        Route::get('/total-amount-deposit', [SubAdminMoniteringReportController::class, 'userTotalDepositAmounts']);
+        Route::get('/total-amount-withdraw', [SubAdminMoniteringReportController::class, 'userTotalWithdrawAmounts']);
+        Route::get('/profit-loss', [SubAdminMoniteringReportController::class, 'profitLoss']);
+        Route::get('/total-users', [SubAdminMoniteringReportController::class, 'totalUsers']);
+        Route::get('/direct-downline-users', [SubAdminMoniteringReportController::class, 'directDownlineUsers']);
+        Route::get('/last24-hour-active-users', [SubAdminMoniteringReportController::class, 'last24HoursActiveUsers']);
+        Route::get('/last24-hour-registered-non-deposit-user', [SubAdminMoniteringReportController::class, 'last24HoursRegisteredNonDepositUsers']);
+        Route::get('/non-deposit-user', [SubAdminMoniteringReportController::class, 'nonDepositUsers']);
+        Route::get('/deposit-withdraw-reports', [SubAdminMoniteringReportController::class, 'depositWithdrawReports']);
+        Route::get('/bank-amount-total-amount', [SubAdminMoniteringReportController::class, 'bankAmountTotalAmount']);
     });
 });
 

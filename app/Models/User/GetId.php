@@ -1,15 +1,16 @@
 <?php
 
 namespace App\Models\User;
-
-use App\Models\AdminAccounts;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\User\UserFirstWithdrawDepositRequest;
+use Jenssegers\Mongodb\Eloquent\HybridRelations;
 use Jenssegers\Mongodb\Eloquent\Model;
+use App\Models\AdminAccounts;
 use App\Models\User;
 
 class GetId extends Model
 {
-    use HasFactory;
+    use HasFactory,HybridRelations;
     protected $connection   = 'mongodb';
     protected $collection   = 'user_request_for_getids';
     protected $guarded     = [];

@@ -68,4 +68,29 @@ class   BaseController extends Controller
         Storage::disk('s3')->delete($image_path);
         return true;
     }
+
+    public function getYesterdayWeekStartAndEndDate(){
+        $res['start']   = date('Y-m-d',strtotime("-1 days"))." 00:00:00";
+        $res['end']     = date('Y-m-d',strtotime("-1 days"))." 23:59:59";
+        return $res;
+    }
+
+    public function getCurrentWeekStartAndEndDate(){
+        $monday = strtotime('next Monday -1 week');
+        $monday = date('w', $monday)==date('w') ? strtotime(date("Y-m-d",$monday)." +7 days") : $monday;
+        $sunday = strtotime(date("Y-m-d",$monday)." +6 days");
+
+        $res['start'] = date("Y-m-d",$monday)." 00:00:00";
+        $res['end'] = date("Y-m-d",$sunday)." 23:59:59";
+        return $res;
+    }
+
+    public function getLastWeekStartAndEndDate(){
+        $date = strtotime(date('Y-m-d'));
+        $previous_monday = strtotime("last week monday",$date);
+        $previous_sunday= strtotime("last week sunday",$date);
+        $res['start'] = date('Y-m-d',$previous_monday)." 00:00:00";
+        $res['end'] = date('Y-m-d',$previous_sunday)." 23:59:59";
+        return $res;
+    }
 }
