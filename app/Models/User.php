@@ -492,4 +492,14 @@ class User extends Authenticatable
 	{
 		return $this->hasMany(UserRequestForGetId::class, 'user_id', 'id');
 	}
+
+	public function parent()
+	{
+		return $this->belongsTo(User::class, 'client_parent_id');
+	}
+
+	public function child()
+	{
+		return $this->hasMany(User::class, 'client_parent_id', 'id');
+	}
 }

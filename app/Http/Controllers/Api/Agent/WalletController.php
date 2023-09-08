@@ -19,7 +19,7 @@ class WalletController extends BaseController
         try {
 
             $pagination =   !empty($request->page_entries) ? $request->page_entries : 25;
-            $walletData = GetId::with('user', 'adminBank')->where('parent_id', $request->user_id)->orderBy('id', 'desc');
+            $walletData = GetId::with('user', 'adminBank')->where('parent_id', $request->user_id)->orderBy('_id', 'desc');
             $type = $request->date_type;
             $from = Carbon::create($request->from_date) . ' 00:00:00';
             $to = Carbon::create($request->to_date) . ' 23:59:59';
@@ -36,16 +36,19 @@ class WalletController extends BaseController
             }
 
             if ($type != '' && in_array($type, [1, 2, 3, 4])) {
+                $today = Carbon::today();
                 if ($type == 1) {
-                    $today = Carbon::today();
                     $walletData = $walletData->where('created_at', '>=', $today);
                 } else {
                     $arr = array(2 => 1, 3 => 7, 4 => 30);
                     $d = $arr[$type];
                     $dayInterval = Carbon::now()->subDay($d);
-                    $walletData = $walletData->where('created_at', '>=', $dayInterval);
+                    $walletData = $walletData->where('created_at', '>=', $dayInterval->startOfDay())
+                        ->where('created_at', '<', $today->startOfDay());
                 }
-            } elseif ($type == 5 && (isset($request->from) && isset($request->to)) && ($from != '' && $to != '')) {
+            } elseif ($type == 5 && (isset($request->from) && isset($request->to))) {
+                $from = Carbon::createFromFormat('Y-m-d H:i:s', $request->from_date . '00:00:00');
+                $to = Carbon::createFromFormat('Y-m-d H:i:s', $request->to_date . '23:59:59');
                 $walletData = $walletData->whereBetween('created_at', [$from, $to]);
             }
             if ($request->search) {

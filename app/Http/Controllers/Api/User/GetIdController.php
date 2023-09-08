@@ -14,6 +14,7 @@ use Illuminate\Support\Collection;
 use App\Models\PaymentMethod;
 use App\Models\UserRequestForGetId;
 use App\Models\User;
+use App\Models\User\UserFirstWithdrawDepositRequest;
 
 class GetIdController extends BaseController
 {
@@ -126,7 +127,25 @@ class GetIdController extends BaseController
             $requestData['status']    = 0;
             $requestData['admin_account_id'] = $request->admin_account_id;
             $requestData['utr_number'] = $request->utr_number;
+
+            $requestData['user_id']   = (int)$request->user_id;
+            $requestData['parent_id'] = (int)$request->parent_id;
+            $requestData['stake']     = (floatval($request->stake));
+
             $res  = GetId::create($requestData);
+            if ($res) {
+                $isfirst = UserFirstWithdrawDepositRequest::where(['user_id' => $request->user_id, 'parent_id' => $request->parent_id, 'type' => 3])->first();
+                if ($isfirst == null) {
+                    $datavalue = array(
+                        'user_id'   => (int)$request->user_id,
+                        'parent_id' => (int)$request->parent_id,
+                        'type'      => 3,
+                        'amount'    => (floatval($request->stake)),
+                        'getid_request_id'  => $res->id,
+                    );
+                    $insert = UserFirstWithdrawDepositRequest::create($datavalue);
+                }
+            }
             return $this->sendResponse($res, 'Your Deposit request sent successfully.');
         } catch (Exception $e) {
             return $this->sendError('Error.', 'Something went wrong.Please try again later.', 401);
