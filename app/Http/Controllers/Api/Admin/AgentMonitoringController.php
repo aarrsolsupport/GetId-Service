@@ -166,8 +166,11 @@ class AgentMonitoringController extends BaseController
             $authId = $request->id;
             if ($authId) {
                 $usersWithChildCount = DB::table('users as u1')->where('client_parent_id', $authId)
-                    ->select('u1.id', 'u1.userid', 'u1.name', 'u1.last_login_at', DB::raw('(SELECT COUNT(*) FROM users as u2 WHERE u2.client_parent_id = u1.id) as child_count'))
-                    ->get();
+                    ->select('u1.id', 'u1.userid', 'u1.name', 'u1.last_login_at', DB::raw('(SELECT COUNT(*) FROM users as u2 WHERE u2.client_parent_id = u1.id) as child_count'));
+                if (isset($request->search) && $request->search != '') {
+                    $usersWithChildCount = $usersWithChildCount->where('u1.userid', 'like', '%' . $request->search . '%');
+                }
+                $usersWithChildCount = $usersWithChildCount->get();
                 return $this->sendResponse($usersWithChildCount, 'Master list.');
             }
         } catch (Exception $e) {
