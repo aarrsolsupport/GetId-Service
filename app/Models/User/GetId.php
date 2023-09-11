@@ -31,6 +31,11 @@ class GetId extends Model
 
     public function adminBank()
     {
-        return $this->belongsTo(AdminAccounts::class, 'bank_account_id', 'id');
+        return $this->belongsTo(AdminAccounts::class, 'admin_account_id', 'id');
+    }
+
+    public function agent()
+    {
+        return $this->belongsTo(User::class, 'parent_id', 'id');
     }
 }

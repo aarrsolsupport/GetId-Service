@@ -17,6 +17,7 @@ use App\Http\Controllers\Api\Agent\NotificationController;
 use App\Http\Controllers\Api\Agent\MoniteringReportController;
 use App\Http\Controllers\Api\SubAdmin\MoniteringReportController as SubAdminMoniteringReportController ;
 use App\Http\Controllers\Api\Agent\WalletController as AgentWalletController;
+use App\Http\Controllers\Api\Admin\AgentMonitoringController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -83,6 +84,19 @@ Route::prefix('admin')->group(function () {
         Route::post('/is-called', [UserNumberController::class, 'isCalled']);
         Route::get('/filter-by-date', [UserNumberController::class, 'dateFilter']);
         Route::get('/master-list', [UserNumberController::class, 'masterList']);
+    });
+
+    Route::prefix('agent-monitor')->group(function () {
+        Route::get('/list', [AgentMonitoringController::class, 'list']);
+        Route::post('/approve', [AgentMonitoringController::class, 'requestApprove']);
+        Route::post('/reject', [AgentMonitoringController::class, 'requestReject']);
+        Route::post('/fake-user-deposit', [AgentMonitoringController::class, 'fakeuserDeposit']);
+        Route::get('/agent-list', [AgentMonitoringController::class, 'agentList']);
+
+        // Route::post('/is-saved', [UserNumberController::class, 'isSaved']);
+        // Route::post('/is-called', [UserNumberController::class, 'isCalled']);
+        // Route::get('/filter-by-date', [UserNumberController::class, 'dateFilter']);
+        // Route::get('/master-list', [UserNumberController::class, 'masterList']);
     });
 });
 
