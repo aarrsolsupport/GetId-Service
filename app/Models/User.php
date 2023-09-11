@@ -11,6 +11,7 @@ use App\UserRegistration;
 use App\UserLoginHistory;
 use App\PokerMarketBets;
 use App\Client;
+use App\Models\User\GetId;
 use App\Models\UserNumber;
 use Auth;
 use DB;
@@ -21,6 +22,7 @@ class User extends Authenticatable
 	use HybridRelations;
 
 	protected $connection = 'mysql';
+    use HasApiTokens, Notifiable,HybridRelations;
 
 	/**
 	 * The attributes that are mass assignable.
@@ -97,8 +99,14 @@ class User extends Authenticatable
         return $this->hasOne(UserFirstWithdrawDepositRequest::class,'user_id','id');
     }
 
+    public function getFirstDeposit(){
+     	return $this->belongsTo(UserFirstWithdrawDepositRequest::class,'id','user_id')
+ 					->where('type',2)
+ 					->orderBy('id','asc');
+    }
+
     public function parent(){
-         return $this->belongsTo(User::class, 'client_parent_id');
+     	return $this->belongsTo(User::class, 'client_parent_id');
     }
 	/**
 	 * The attributes that should be hidden for arrays.
@@ -508,11 +516,6 @@ class User extends Authenticatable
 	public function user_request_get_id()
 	{
 		return $this->hasMany(UserRequestForGetId::class, 'user_id', 'id');
-	}
-
-	public function parent()
-	{
-		return $this->belongsTo(User::class, 'client_parent_id');
 	}
 
 	public function child()

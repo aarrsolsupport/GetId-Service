@@ -30,23 +30,10 @@ class BankAccountController extends BaseController
             return $this->sendError('Error.', 'Something went wrong.Please try again later.', 401);
         }
     }
-
-    // public function list($id)
-    // {
-    //     if ($id) {
-    //         $data = BankAccount::where('user_id', $id)
-    //             ->where('is_active', 1)
-    //             ->orderBy('created_at', 'desc')
-    //             ->get();
-    //         return $this->sendResponse($data, 'success');
-    //     }
-    //     return $this->sendError('Error.', 'Something went wrong.Please try again later.', 401);
-    // }
-
-    public function list(Request $request)
-    {
-        if ($request->user_id) {
-            $data = BankAccount::where('user_id', $request->user_id)
+    
+    public function list($user_id){
+        if ($user_id) {
+            $data = BankAccount::where('user_id', $user_id)
                 ->with(['bank' => function ($query) {
                     $query->select('bank_name', 'country', 'icon');
                 }])
